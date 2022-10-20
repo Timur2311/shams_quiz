@@ -40,12 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 3rd party apps
-    'django_celery_beat',
-    'debug_toolbar',
+    # 'django_celery_beat',
+    # 'debug_toolbar',
 
     # local apps
     'users.apps.UsersConfig',
-    'arcgis',
+    # 'arcgis',
+    
+    'group_challenge',
+    'exam',
+    'question',
 ]
 
 MIDDLEWARE = [

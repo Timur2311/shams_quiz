@@ -24,13 +24,13 @@ class User(CreateUpdateTracker):
     last_name = models.CharField(max_length=256, **nb)
     language_code = models.CharField(max_length=8, help_text="Telegram client's lang", **nb)
     deep_link = models.CharField(max_length=64, **nb)
-
     is_blocked_bot = models.BooleanField(default=False)
-
     is_admin = models.BooleanField(default=False)
-
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
+    name = models.CharField(max_length=128, null=True, blank=True, default="IsmiGul")
+    score = models.IntegerField(default=0)
+    region = models.CharField(max_length = 32, null=True)
 
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'
