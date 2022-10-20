@@ -41,7 +41,7 @@ INSTALLED_APPS = [
 
     # 3rd party apps
     # 'django_celery_beat',
-    # 'debug_toolbar',
+    'debug_toolbar',
 
     # local apps
     'users.apps.UsersConfig',
@@ -81,7 +81,7 @@ ROOT_URLCONF = 'dtb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -142,6 +142,8 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = 'media/'
 
 # -----> CELERY
 REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379')
