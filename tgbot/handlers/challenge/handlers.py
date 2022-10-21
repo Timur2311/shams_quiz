@@ -137,7 +137,7 @@ def challenge_callback(update: Update, context: CallbackContext):
             if data[1] == "revansh":
                 query.edit_message_text(
                     f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
-                context.bot.send_message(chat_id = user_challenge.opponet.user_id,text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.",reply_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}")]]) ,parse_mode=ParseMode.HTML )
+                context.bot.send_message(chat_id = user_challenge.opponent.user_id,text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.",reply_keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}")]]) ,parse_mode=ParseMode.HTML )
             else:
                 query.edit_message_text(
                     f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
@@ -425,25 +425,6 @@ def back_to_challenge_stage(update: Update, context: CallbackContext):
     ], resize_keyboard=True))
 
     return consts.SHARING_CHALLENGE
-
-
-# def exam_start(update: Update, context: CallbackContext) -> None:
-#     """
-#     TODO:
-#     - Pagination
-#     """
-#     exams = Exam.objects.all()
-#     inline_keyboard = keyboards.exam_keyboard(exams)
-
-#     if update.callback_query:
-#         update.callback_query.message.edit_text(
-#             text=static_text.exam_start, reply_markup=inline_keyboard,
-#             parse_mode=ParseMode.HTML
-#         )
-#     else:
-#         update.message.reply_text(
-#             text=static_text.exam_start, reply_markup=inline_keyboard)
-
 
 def leader(update: Update, context: CallbackContext) -> None:
     users = User.objects.all()
