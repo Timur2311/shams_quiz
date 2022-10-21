@@ -96,7 +96,7 @@ def challenge_callback(update: Update, context: CallbackContext):
     user_challenge_id = data[4]
     user_challenge_id = int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.get(id=challenge_owner_id)
+    user_challenge = UserChallenge.objects.get(id=user_challenge_id)
 
     user, _ = User.get_user_and_created(update, context)
 
@@ -193,10 +193,14 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     data = update.callback_query.data.split("-")
     user_challenge_id = data[2]
+    
+    user_challenge_id = int(user_challenge_id)
+    
     user_type = data[4]
     user_id = data[5]
+    user_id = int(user_id)
     user = User.objects.get(user_id=user_id)
-    user_challenge = UserChallenge.objects.get(id=int(user_challenge_id))
+    user_challenge = UserChallenge.objects.get(id=user_challenge_id)
 
     
     
@@ -243,9 +247,20 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
 def challenge_handler(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
     question_id = data[2]
+    
+    question_id = int(question_id)
+    
     question_option_id = data[3]
+    
+    question_option_id = int(question_option_id)
+    
     user_challenge_id = data[4]
+    
+    user_challenge_id = int(user_challenge_id)
+    
     from_user_id = data[5]
+    
+    from_user_id = int(from_user_id)
 
     user = User.objects.get(user_id=from_user_id)
 
@@ -389,7 +404,13 @@ def challenge_handler(update: Update, context: CallbackContext):
 def back_to_challenge_stage(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
     user_challenge_id = data[3]
+    
+    user_challenge_id - int(user_challenge_id)
+
+    
     user_id = data[2]
+    
+    user_id = int(user_id)
 
     user_challenge = UserChallenge.objects.get(id=user_challenge_id)
     message_id = user_challenge.created_challenge_message_id
@@ -445,10 +466,18 @@ def leader(update: Update, context: CallbackContext) -> None:
 def random_opponent(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
+    
     user_challenge_id = data[1]
+    
+    user_challenge_id - int(user_challenge_id)
+
+    
     created_user_challenge = UserChallenge.objects.get(id=user_challenge_id)
     from_user_id = data[2]
-    user_challenge = UserChallenge.objects.get(id=int(user_challenge_id))
+    
+    from_user_id = int(from_user_id)
+    
+    user_challenge = UserChallenge.objects.get(id=user_challenge_id)
 
     possible_challenges = UserChallenge.objects.filter(
         is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.get(user_id=from_user_id))
@@ -483,9 +512,18 @@ def random_opponent(update: Update, context: CallbackContext):
 def revansh(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
+    
     challenge_id = data[1]
+    
+    challenge_id = int(challenge_id)
+    
     from_user_id = data[2]
+    
+    from_user_id = int(from_user_id)
+    
+    
     to_user_id = data[3]
+    to_user_id = int(to_user_id)
 
     user = User.objects.get(user_id=from_user_id)
     opponent = User.objects.get(user_id=to_user_id)
