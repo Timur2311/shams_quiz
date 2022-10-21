@@ -75,7 +75,8 @@ def setup_dispatcher(dp):
     ]
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(
+        entry_points=[
+            CommandHandler(
             'start', onboarding_handlers.command_start),
             CallbackQueryHandler(
             challenge_handlers.revansh, pattern=r"revansh-"),
@@ -149,7 +150,10 @@ def setup_dispatcher(dp):
                 CallbackQueryHandler(
                 exam_handler.stage_exams, pattern=r"stage-exams-")]
         },
-        fallbacks=[],
+        fallbacks=[
+            CommandHandler(
+            'start', onboarding_handlers.command_start),
+        ],
     )
 
     dp.add_handler(conv_handler)
@@ -239,7 +243,7 @@ def set_up_commands(bot_instance: Bot) -> None:
 
 # WARNING: it's better to comment the line below in DEBUG mode.
 # Likely, you'll get a flood limit control error, when restarting bot too often
-set_up_commands(bot)
+# set_up_commands(bot)
 
 n_workers = 0 if DEBUG else 4
 dispatcher = setup_dispatcher(Dispatcher(
