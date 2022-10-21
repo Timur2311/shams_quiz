@@ -21,15 +21,14 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
 
     query = update.inline_query.query
     
-    user_challenges = UserChallenge.objects.all()
 
     if query == "":
         return
 
-    for user_challenge in user_challenges:
-        if  query == str(user_challenge.id):
-            text = f"Sizni {query}-bosqich savollari bo'yicha bellashuvga taklif qilamiz!"
-            my_user_challenge = user_challenge
+    user_challenge = UserChallenge.objects.get(id = int(query))
+    
+    text = f"Sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilamiz!"
+    my_user_challenge = user_challenge
     
     
 
