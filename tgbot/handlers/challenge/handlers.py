@@ -92,9 +92,11 @@ def challenge_callback(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
     received_type = data[2]
     challenge_owner_id = data[3]
+    challenge_owner_id = int(challenge_owner_id)
     user_challenge_id = data[4]
+    user_challenge_id - int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.get(id=int(user_challenge_id))
+    user_challenge = UserChallenge.objects.get(id=challenge_owner_id)
 
     user, _ = User.get_user_and_created(update, context)
 
@@ -146,9 +148,15 @@ def user_check(update: Update, context: CallbackContext):
     query = update.callback_query
     data = update.callback_query.data.split("-")
     user_challenge_id = data[1]
+    user_challenge_id - int(user_challenge_id)
+    
     user_challenge = UserChallenge.objects.get(id=user_challenge_id)
     challenge_owner_id = data[2]
+    challenge_owner_id = int(challenge_owner_id)
+
+    
     user_id = data[3]
+    user_id = int(user_id)
     received_type = data[4]
     user, _ = User.get_user_and_created(update, context)
 
