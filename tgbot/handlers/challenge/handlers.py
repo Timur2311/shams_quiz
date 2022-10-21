@@ -94,7 +94,7 @@ def challenge_callback(update: Update, context: CallbackContext):
     challenge_owner_id = data[3]
     challenge_owner_id = int(challenge_owner_id)
     user_challenge_id = data[4]
-    user_challenge_id - int(user_challenge_id)
+    user_challenge_id = int(user_challenge_id)
 
     user_challenge = UserChallenge.objects.get(id=challenge_owner_id)
 
@@ -148,7 +148,7 @@ def user_check(update: Update, context: CallbackContext):
     query = update.callback_query
     data = update.callback_query.data.split("-")
     user_challenge_id = data[1]
-    user_challenge_id - int(user_challenge_id)
+    user_challenge_id = int(user_challenge_id)
     
     user_challenge = UserChallenge.objects.get(id=user_challenge_id)
     challenge_owner_id = data[2]
