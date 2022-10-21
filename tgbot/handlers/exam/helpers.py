@@ -3,7 +3,7 @@ from users.models import User
 
 from exam.models import UserExamAnswer
 
-def send_test(update, context, question, user_exam, user):
+def send_test(update, context, question, user_exam, user,type = "exam"):
     
 
     number_of_test = context.user_data["number_of_test"]
@@ -12,11 +12,12 @@ def send_test(update, context, question, user_exam, user):
     variants = ["A", "B", "C"]
     buttons = []
     
-    user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
-    user_exam_answer.number = str(number_of_test)
-   
-    user_exam_answer.save()
     
+    if type == "exam":
+        user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
+        user_exam_answer.number = str(number_of_test)
+        user_exam_answer.save()
+
     for index, question_option in enumerate(question.options.order_by("?")):
             text += f"\n<b>{variants[index]}</b>) {question_option.content}"
             buttons.append([InlineKeyboardButton(f"{variants[index]}", callback_data=f"question-variant-{question.id}-{question_option.id}-{user_exam.id}-{user.user_id}")])

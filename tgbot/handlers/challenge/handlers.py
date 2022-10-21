@@ -210,7 +210,7 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
         context.user_data["chat_id"] = update.callback_query.message.chat_id
 
         helpers.send_test(update=update, context=context,
-                          question=question, user_exam=user_challenge, user=user)
+                          question=question, user_exam=user_challenge, user=user, type = "challenge")
 
     elif user_type == "opponent":
         now = datetime.now()
@@ -227,7 +227,7 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
         context.user_data["message_id"] = del_message.message_id
         context.user_data["chat_id"] = update.callback_query.message.chat_id
         helpers.send_test(update=update, context=context,
-                          question=question, user_exam=user_challenge, user=user)
+                          question=question, user_exam=user_challenge, user=user, type = "challenge")
 
     return consts.SHARING_CHALLENGE
 
@@ -258,7 +258,7 @@ def challenge_handler(update: Update, context: CallbackContext):
     question = user_challenge.last_unanswered_question(user)
     if question:
         helpers.send_test(update=update, context=context,
-                          question=question, user_exam=user_challenge, user=user)
+                          question=question, user_exam=user_challenge, user=user, type = "challenge")
 
     else:
         now = datetime.now()
