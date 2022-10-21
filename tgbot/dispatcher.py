@@ -31,7 +31,7 @@ def setup_dispatcher(dp):
     Adding handlers for events from Telegram
     """
     # onboarding
-    dp.add_handler(CommandHandler("start",  onboarding_handlers.command_start))
+    # dp.add_handler(CommandHandler("start", onboarding_handlers.command_start))
 
     # admin commands
     dp.add_handler(CommandHandler("admin", admin_handlers.admin))
@@ -76,8 +76,8 @@ def setup_dispatcher(dp):
 
     conv_handler = ConversationHandler(
         entry_points=[
-            # CommandHandler(
-            # 'start', onboarding_handlers.command_start),
+            CommandHandler(
+            'start', onboarding_handlers.command_start),
             CallbackQueryHandler(
             challenge_handlers.revansh, pattern=r"revansh-"),
 
@@ -150,7 +150,10 @@ def setup_dispatcher(dp):
                 CallbackQueryHandler(
                 exam_handler.stage_exams, pattern=r"stage-exams-")]
         },
-        fallbacks=[],
+        fallbacks=[
+            CommandHandler(
+            'start', onboarding_handlers.command_start),
+        ],
     )
 
     dp.add_handler(conv_handler)
