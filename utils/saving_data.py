@@ -1,4 +1,5 @@
 import pandas as pd
+import sys
 
 from exam.models import Question
 
@@ -6,13 +7,17 @@ from group_challenge.models import Challenge
 
 def saving_data():
     for i in range(40):
-        workbook = pd.read_excel('media/questions/test.xlsx',sheet_name = f'{i+1}')
+        workbook = pd.read_excel('media/questions/test.xlsx',sheet_name = i)
         exam_title = workbook['name'].iloc[0]
         stage = int(workbook['stage'].iloc[0])
         tour = int(workbook['tour'].iloc[0])
-        # print(f"{i+1}-sheet====={len(workbook['name'])}")
+        print(f"{i+1}-sheet====={len(workbook['question'])}")
     # print(workbook.head())
         questions_count = len(workbook['question'])
+        if questions_count%5==0:
+            pass
+        elif questions_count%5 !=0:
+            questions_count=questions_count-1
         if questions_count>0:
             for i in range(0,questions_count,5):                
                 content = workbook['question'].iloc[i]
