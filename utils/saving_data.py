@@ -54,7 +54,7 @@ def saving_data():
                     challenge = Challenge.objects.get(stage = stage)
                     challenge.questions.add(question) 
                 
-                if i+5>=len(questions_list):
+                if i+6>=len(questions_list):
                     break
                 
             
