@@ -12,9 +12,9 @@ def saving_data():
         all_columns = workbook.columns.tolist()
         print(f"\n\n{i}----{all_columns}\n\n")
         
-        name_list = workbook[all_columns[2]].tolist()
-        stage_list = workbook[all_columns[3]].tolist()
-        tour_list = workbook[all_columns[4]].tolist()
+        name_list = workbook['name']
+        stage_list = workbook['stage']
+        tour_list = workbook['tour']
         
         # print(f"\n\nname----{name_list[0]},{name_list[1]},{name_list[2]}\nstage---{stage_list[0]}\ntour---{tour_list[0]}\n\n")
         
