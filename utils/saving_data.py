@@ -11,7 +11,7 @@ def saving_data():
         exam_title = workbook['name'].iloc[0]
         stage = int(workbook['stage'].iloc[0])
         tour = int(workbook['tour'].iloc[0])
-        print(f"{i+1}-sheet====={len(workbook['question'])}")
+        # print(f"{i+1}-sheet====={len(workbook['question'])}")
     # print(workbook.head())
         questions_count = len(workbook['question'])
         if questions_count%5==0:
