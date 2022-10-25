@@ -1,3 +1,4 @@
+
 import pandas as pd
 import sys
 
@@ -8,23 +9,32 @@ from group_challenge.models import Challenge
 def saving_data():
     for i in range(40):
         workbook = pd.read_excel('media/questions/test.xlsx',sheet_name = i)
-        exam_title = workbook['name'].iloc[0]
-        stage = int(workbook['stage'].iloc[0])
-        tour = int(workbook['tour'].iloc[0])
+        all_columns = workbook.columns.tolist()
+        print(f"\n\n{i}----{all_columns}\n\n")
+        
+        name_list = workbook[all_columns[2]].tolist()
+        stage_list = workbook[all_columns[3]].tolist()
+        tour_list = workbook[all_columns[4]].tolist()
+        
+        # print(f"\n\nname----{name_list[0]},{name_list[1]},{name_list[2]}\nstage---{stage_list[0]}\ntour---{tour_list[0]}\n\n")
+        
+        
         # print(f"{i+1}-sheet====={len(workbook['question'])}")
     # print(workbook.head())
-        questions_count = len(workbook['question'])
-        if questions_count%5==0:
-            pass
-        elif questions_count%5 !=0:
-            questions_count=questions_count-1
-        if questions_count>0:
-            for i in range(0,questions_count,5):                
-                content = workbook['question'].iloc[i]
-                incorrect1 = workbook['question'].iloc[i+1]
-                incorrect2 = workbook['question'].iloc[i+2]
-                correct = workbook['question'].iloc[i+3]            
-                true_definition = workbook['question'].iloc[i+4]
+        questions_list = workbook['question'].tolist()
+
+        
+        
+        if len(questions_list)>0:
+            for i, question_object in enumerate(questions_list):   
+                exam_title = name_list[i]
+                stage = int(stage_list[i])
+                tour = int(tour_list[i])             
+                content = questions_list[i]
+                incorrect1 = questions_list[i+1]
+                incorrect2 = questions_list[i+2]
+                correct = questions_list[i+3]            
+                true_definition = questions_list[i+4]
                 
                 # print(f"\n\ncontent--{content}\n incorrect1--{incorrect1}\n incorrect2--{incorrect2}\n correct--{correct} ")
                 
@@ -44,7 +54,7 @@ def saving_data():
                     challenge = Challenge.objects.get(stage = stage)
                     challenge.questions.add(question) 
                 
-                if i+5>=questions_count:
+                if i+5>=len(questions_list):
                     break
                 
             
