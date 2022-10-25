@@ -6,7 +6,7 @@ from group_challenge.models import Challenge
 
 def saving_data():
     for i in range(40):
-        workbook = pd.read_excel('media/questions/test.xlsx',heet_name = f'{i+1}')
+        workbook = pd.read_excel('media/questions/test.xlsx',sheet_name = f'{i+1}')
         exam_title = workbook['name'].iloc[0]
         stage = workbook['stage'].iloc[0]
         tour = workbook['tour'].iloc[0]
