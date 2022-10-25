@@ -8,18 +8,20 @@ def saving_data():
     for i in range(40):
         workbook = pd.read_excel('media/questions/test.xlsx',sheet_name = f'{i+1}')
         exam_title = workbook['name'].iloc[0]
-        stage = workbook['stage'].iloc[0]
-        tour = workbook['tour'].iloc[0]
-        
+        stage = int(workbook['stage'].iloc[0])
+        tour = int(workbook['tour'].iloc[0])
+        # print(f"{i+1}-sheet====={len(workbook['name'])}")
     # print(workbook.head())
         questions_count = len(workbook['question'])
         if questions_count>0:
-            for i in range(0,questions_count,5):
+            for i in range(0,questions_count,5):                
                 content = workbook['question'].iloc[i]
                 incorrect1 = workbook['question'].iloc[i+1]
                 incorrect2 = workbook['question'].iloc[i+2]
                 correct = workbook['question'].iloc[i+3]            
                 true_definition = workbook['question'].iloc[i+4]
+                
+                # print(f"\n\ncontent--{content}\n incorrect1--{incorrect1}\n incorrect2--{incorrect2}\n correct--{correct} ")
                 
                 question  = Question.objects.create(content = content, stage = stage, tour = tour, true_definition=true_definition )    
                 question.create_exam(exam_title=exam_title)
@@ -37,7 +39,8 @@ def saving_data():
                     challenge = Challenge.objects.get(stage = stage)
                     challenge.questions.add(question) 
                 
-        
+                if i==questions_count-6:
+                    break
                 
             
        
