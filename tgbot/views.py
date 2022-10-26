@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
 from dtb.settings import DEBUG
+from question.models import QuestionFile
 from tgbot.dispatcher import process_telegram_event
 
 from tgbot.forms import QuestionForm
@@ -21,8 +22,12 @@ def add_question(request):
     if request.method == "POST":
         # print(f"{request.FILES}")
         form = QuestionForm(request.POST, request.FILES)
+        files = request.FILES.getlist('file')
         if form.is_valid():
-            form.save()
+            for f in files:
+                 file_instance = QuestionFile(file=f)
+                 file_instance.save()
+            
             
         saving_data()
             
