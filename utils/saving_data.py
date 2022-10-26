@@ -27,6 +27,13 @@ def saving_data():
         
         if len(questions_list)>0:
             for i, question_object in enumerate(questions_list):   
+                if len(questions_list)%5==0:
+                    if i+5>len(questions_list):
+                        break
+                else:
+                    if i+5>=len(questions_list):
+                        break
+                        
                 exam_title = name_list[i]
                 stage = int(stage_list[i])
                 tour = int(tour_list[i])             
@@ -54,8 +61,7 @@ def saving_data():
                     challenge = Challenge.objects.get(stage = stage)
                     challenge.questions.add(question) 
                 
-                if i+6>=len(questions_list):
-                    break
+                
                 
             
        
