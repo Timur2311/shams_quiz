@@ -28,8 +28,15 @@ def command_start(update: Update, context: CallbackContext) -> None:
         if created:
             if context.user_data.get(consts.FROM_CHAT):
                 text = "Botga xush kelibsiz, iltimos ismingizni kiriting!"
+                update.message.reply_text(text=text,
+                                  reply_markup=make_keyboard_for_start_command())
+                return consts.NAME
+                
             elif u.name == "IsmiGul":
                 text = "Iltimos ismingizni kiriting, agar ismingizni kiritmasangiz bot sizni \"IsmiGul\" deb saqlab qo'yadi"
+                update.message.reply_text(text=text,
+                                  reply_markup=make_keyboard_for_start_command())
+                return consts.NAME
             elif u.region is None:
                 text = "Ilitmos viloyatingizni kiriting"
                 update.message.reply_text(text=text,
@@ -38,18 +45,23 @@ def command_start(update: Update, context: CallbackContext) -> None:
         else:
             if u.name == "IsmiGul":
                 text = "Siz botda IsmiGul bo'lib qolib ketibsiz , iltimos asl ismingizni kiriting yoki shundayligicha davom ettirish uchun quyidagilardan birini tanlang⬇️"
+                update.message.reply_text(text=text,
+                                  reply_markup=make_keyboard_for_start_command())
+                return consts.NAME
             else:
-                text = f"{u.name} sizni botda qayta ko'rganimizdan xursandmiz, quyidagilardan birini tanlang⬇️"
                 if u.region is None:
                     text = "Ilitmos viloyatingizni kiriting"
                     update.message.reply_text(text=text,
                                   reply_markup=make_keyboard_for_regions())
                     return consts.REGION
-
-        update.message.reply_text(text=text,
+                text = f"{u.name} sizni botda qayta ko'rganimizdan xursandmiz, quyidagilardan birini tanlang⬇️"
+                update.message.reply_text(text=text,
                                   reply_markup=make_keyboard_for_start_command())
+                return consts.SELECTING_ACTION
 
-    return consts.SELECTING_ACTION
+        
+
+    
 
 
 def registration(update: Update, context: CallbackContext):

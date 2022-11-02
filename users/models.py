@@ -1,4 +1,5 @@
 from __future__ import annotations
+from email.policy import default
 
 from typing import Union, Optional, Tuple
 
@@ -31,6 +32,11 @@ class User(CreateUpdateTracker):
     name = models.CharField(max_length=128, null=True, blank=True, default="IsmiGul")
     score = models.IntegerField(default=0)
     region = models.CharField(max_length = 32, null=True)
+    
+    is_busy = models.BooleanField(default = False)
+    is_random_opponent_waites = models.BooleanField(default = False)
+    
+    
 
 
     def set_user_score(self):

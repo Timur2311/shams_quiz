@@ -2,6 +2,7 @@
 
 from telegram import ParseMode, Update, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
+from group_challenge.models import UserChallenge
 from tgbot import consts
 
 from tgbot.handlers.exam import static_text
@@ -133,6 +134,11 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
             user_exam.create_answers()
             question = user_exam.last_unanswered_question()
             query.delete_message()
+            
+            #user is starting pass test
+            user.is_busy = True
+            user.save()
+            
             query.message.reply_text(
                 f"Test boshlandi!\n\n Testlar soni: {counter} ta", reply_markup=ReplyKeyboardRemove())
 
@@ -178,8 +184,19 @@ def exam_handler(update: Update, context: CallbackContext):
         user_exam.is_finished = True
         user_exam.save()
         update.callback_query.delete_message()
+        
+        #user ended passing test
+        user.is_busy =  False
+        user.save()
+        
         context.bot.send_message(
             user.user_id, f"Imtihon tugadi.\n\nTo'g'ri javoblar soni: {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh\" tugmasini bosing yoki \"Testlarga qaytish\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]))
+        #here
+        if user.is_random_opponent_waites:
+            user_challenges = UserChallenge.objects.filter(user=user, is_random_opponent=True, is_active=True).exclude(opponent = None)
+            user_challenge = user_challenges.first()
+            context.bot.send_message(user.user_id , "Sizga tasodifiy raqib topildi.", reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Boshlash", callback_data=f"challenge-confirmation-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
 
     return consts.PASS_TEST
 

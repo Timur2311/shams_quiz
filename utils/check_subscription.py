@@ -1,4 +1,4 @@
-import imp
+
 from tgbot import consts
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
