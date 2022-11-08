@@ -494,16 +494,14 @@ def revansh(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
 
-    challenge_id = data[1]
+    challenge_id = int(data[1])
 
-    challenge_id = int(challenge_id)
+    
 
-    from_user_id = data[2]
+    from_user_id = int(data[2])
 
-    from_user_id = int(from_user_id)
 
-    to_user_id = data[3]
-    to_user_id = int(to_user_id)
+    to_user_id = int(data[3])
 
     user = User.objects.get(user_id=from_user_id)
     opponent = User.objects.get(user_id=to_user_id)
