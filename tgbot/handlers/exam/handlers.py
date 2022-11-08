@@ -185,7 +185,7 @@ def exam_handler(update: Update, context: CallbackContext):
         update.callback_query.delete_message()
 
         context.bot.send_message(
-            user.user_id, f"<b>Imtihon tugadi🏁</b>\n\n<b>To'g'ri javoblar soni✅:</b> {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh💬\" tugmasini bosing yoki \"Testlarga qaytish📚\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh💬", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]))
+            user.user_id, f"<b>Imtihon tugadi🏁</b>\n\n<b>To'g'ri javoblar soni✅:</b> {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh💬\" tugmasini bosing yoki \"Testlarga qaytish📚\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh💬", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]), parse_mode = ParseMode.HTML)
 
         user.is_busy = False
         user.save()
