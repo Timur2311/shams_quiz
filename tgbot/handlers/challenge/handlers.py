@@ -168,17 +168,24 @@ def challenge_callback(update: Update, context: CallbackContext):
     elif received_type == consts.ACCEPT:
 
         if user.user_id != challenge_owner_id:
-            user_challenge.users.add(user)
-            user_challenge.opponent = user
-            user_challenge.save()
+            
             if type_of_challenge == "revansh":
+                user_challenge.users.add(user)
+                user_challenge.opponent = user
+                user_challenge.save()
                 context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> qayta bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
 
                 query.edit_message_text(text="Siz qayta bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
             elif type_of_challenge == "challenge":
-
+                if user_challenge.opponent is not None:
+                    query.edit_message_text("Afsuski do'stingiz boshqasi bilan bellashmoqda. https://t.me/shamsquizbot botimiz orqali bellashuv yaratishingiz hamda do'stingiz bilan bellashishingiz mumkin.")
+                    return
+                else:
+                    user_challenge.users.add(user)
+                    user_challenge.opponent = user
+                    user_challenge.save()
                 query.edit_message_text(
                     text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
                 message_id = user_challenge.created_challenge_message_id
