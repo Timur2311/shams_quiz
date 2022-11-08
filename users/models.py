@@ -42,14 +42,19 @@ class User(CreateUpdateTracker):
 
     def set_user_score(self):
         user_exams = self.as_owner.all()
+        score = 0
+        
         for user_exam in user_exams:
-            self.score+=user_exam.user_score
-        self.save()
+            score+=user_exam.user_score
+        
         user_challenges = self.as_opponent.all()
         
         for user_challenge in user_challenges:
-            self.score+=user_challenge.opponent_score
-        self.save()
+            score+=user_challenge.opponent_score
+            
+        if score>self.score:
+            self.score = score
+            self.save()
             
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'
