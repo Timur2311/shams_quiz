@@ -17,7 +17,6 @@ from dtb.celery import app  # event processing in async mode
 from dtb.settings import TELEGRAM_TOKEN, DEBUG
 
 from tgbot.handlers.utils import error
-from tgbot.handlers.admin import handlers as admin_handlers
 from tgbot.handlers.onboarding import handlers as onboarding_handlers
 from tgbot.handlers.exam import handlers as exam_handler
 from tgbot.handlers.challenge import handlers as challenge_handlers

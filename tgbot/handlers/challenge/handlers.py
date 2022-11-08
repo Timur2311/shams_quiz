@@ -174,14 +174,14 @@ def challenge_callback(update: Update, context: CallbackContext):
             user_challenge.users.add(user)
             user_challenge.opponent = user
             user_challenge.save()
-            if data[1] == "revansh":
+            if type_of_challenge == "revansh":
 
                 context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
 
                 query.edit_message_text(text="Siz bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
-            elif data[1] == "challenge":
+            elif type_of_challenge == "challenge":
 
                 query.edit_message_text(
                     text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
@@ -195,7 +195,7 @@ def challenge_callback(update: Update, context: CallbackContext):
                                          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
     elif received_type == consts.DECLINE:
         if user.user_id != challenge_owner_id:
-            if data[1] == "revansh":
+            if type_of_challenge == "revansh":
                 query.edit_message_text(
                     f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
                 context.bot.send_message(chat_id=user_challenge.opponent.user_id, text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", reply_markup=InlineKeyboardMarkup(
