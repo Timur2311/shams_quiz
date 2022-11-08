@@ -161,50 +161,48 @@ def challenge_callback(update: Update, context: CallbackContext):
     user, _ = User.get_user_and_created(update, context)
 
     # user.user_id = str(query.from_user.id)
-    if type_of_challenge == "revansh":
-        pass
-    else:
-        if user.name == "IsmiGul":
-            context.user_data[consts.FROM_CHAT] = True
-            if user.user_id != challenge_owner_id:
-                query.edit_message_text(f"Siz https://t.me/shamsquizbot botimizda \"IsmiGul\" bo'lib qolib ketibsiz, iltimos botga o'tib ro'yxatdan o'ting. Ro'xatdan o'tib bo'lgach \"Tekshirish\" tugmasini bosing", reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("Tekshirish", callback_data=f"check-{user_challenge.id}-{challenge_owner_id}-{user.user_id}-{received_type}")]]))
 
-        elif received_type == consts.ACCEPT:
+    if user.name == "IsmiGul":
+        context.user_data[consts.FROM_CHAT] = True
+        if user.user_id != challenge_owner_id:
+            query.edit_message_text(f"Siz https://t.me/shamsquizbot botimizda \"IsmiGul\" bo'lib qolib ketibsiz, iltimos botga o'tib ro'yxatdan o'ting. Ro'xatdan o'tib bo'lgach \"Tekshirish\" tugmasini bosing", reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Tekshirish", callback_data=f"check-{user_challenge.id}-{challenge_owner_id}-{user.user_id}-{received_type}")]]))
 
-            if user.user_id != challenge_owner_id:
-                user_challenge.users.add(user)
-                user_challenge.opponent = user
-                user_challenge.save()
-                if data[1] == "revansh":
+    elif received_type == consts.ACCEPT:
 
-                    context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
+        if user.user_id != challenge_owner_id:
+            user_challenge.users.add(user)
+            user_challenge.opponent = user
+            user_challenge.save()
+            if data[1] == "revansh":
 
-                    query.edit_message_text(text="Siz bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
-                                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
-                elif data[1] == "challenge":
+                context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
 
-                    query.edit_message_text(
-                        text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
-                    message_id = user_challenge.created_challenge_message_id
-                    chat_id = user_challenge.created_challenge_chat_id
-                    context.bot.delete_message(
-                        chat_id=chat_id, message_id=message_id)
-                    context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
-                    context.bot.send_message(chat_id=user.user_id, text="Siz bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
-                                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
-        elif received_type == consts.DECLINE:
-            if user.user_id != challenge_owner_id:
-                if data[1] == "revansh":
-                    query.edit_message_text(
-                        f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
-                    context.bot.send_message(chat_id=user_challenge.opponent.user_id, text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}")]]), parse_mode=ParseMode.HTML)
-                else:
-                    query.edit_message_text(
-                        f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
+                query.edit_message_text(text="Siz bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
+                                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
+            elif data[1] == "challenge":
+
+                query.edit_message_text(
+                    text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
+                message_id = user_challenge.created_challenge_message_id
+                chat_id = user_challenge.created_challenge_chat_id
+                context.bot.delete_message(
+                    chat_id=chat_id, message_id=message_id)
+                context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
+                context.bot.send_message(chat_id=user.user_id, text="Siz bellashuvga rozi bo'ldingiz. Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
+                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
+    elif received_type == consts.DECLINE:
+        if user.user_id != challenge_owner_id:
+            if data[1] == "revansh":
+                query.edit_message_text(
+                    f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
+                context.bot.send_message(chat_id=user_challenge.opponent.user_id, text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", reply_keyboard=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}")]]), parse_mode=ParseMode.HTML)
+            else:
+                query.edit_message_text(
+                    f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> challenge ga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
 
 
 def user_check(update: Update, context: CallbackContext):
