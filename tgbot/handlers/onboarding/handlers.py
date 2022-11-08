@@ -126,23 +126,7 @@ def home_page(update: Update, context: CallbackContext):
     user_id = data[2]
     user, _ = User.get_user_and_created(update, context)
     
-    
-    
-    # if len(data)==4:
-    #     user_challenge = UserChallenge.objects.get(id=int(data[3]))
-    #     if user_challenge.user.user_id == user_id:
-    #         message_id = user_challenge.user_message_id
-    #         chat_id = user_challenge.user_chat_id
-    #     else:
-    #         message_id = user_challenge.opponent_message_id
-    #         chat_id = user_challenge.opponent_chat_id
-    #     context.bot.delete_message(
-    #     message_id=message_id, chat_id=chat_id)
-    # else:
-    #     message_id = context.user_data["message_id"]
-    #     context.bot.delete_message(
-    #     message_id=message_id, chat_id=update.callback_query.message.chat_id)
-    
+    update.callback_query.message.delete()
     
     if user.name == "IsmiGul":
         text = "Siz botda IsmiGul bo'lib qolib ketibsiz , iltimos asl ismingizni kiriting yoki shundayligicha davom ettirish uchun quyidagilardan birini tanlang⬇️"
