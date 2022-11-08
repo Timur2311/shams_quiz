@@ -1,19 +1,16 @@
 
 from tgbot import consts
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 
 
-def check_subscription(update,context,u):
+def check_subscription(update, context, u):
     if context.user_data["not_subscribed"]:
-        context.user_data['counter']+=1
-        user_message = update.callback_query.edit_message_text(text = f"{context.user_data['counter']} - urinishingiz bekor ketdi. Iltimos avval {consts.CHANNEL_USERNAME} telegram kanaliga a'zo bo'ling, so'ng  \"Tekshirish\" tugmasini bosing.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Tekshirish", callback_data=f"checking-subscription-")]]))
+        update.callback_query.message.delete()
+        user_message = context.bot.send_message(chat_id = u.user_id,text=f"Iltimos avval \"A'lamiy\" telegram kanaliga a'zo bo'ling, so'ng  \"{consts.JOINED}\" tugmasini bosing. Kanalga o'tish uchun \"Kanalga o'tish\" tugmasini bosing.", reply_markup=InlineKeyboardMarkup([
+                                                               [InlineKeyboardButton(consts.JOINED, callback_data=f"checking-subscription-")], [InlineKeyboardButton("Kanalga o'tish", url = "https://t.me/alamiy_uz")]]))
         context.user_data["message_id"] = user_message.message_id
-        
-    else:        
-        user_message = context.bot.send_message(chat_id = u.user_id, text = f"Hurmatli foydalanuvchi botdan foydalanish uchun {consts.CHANNEL_USERNAME} telegram kanaliga a'zo bo'lishingizni so'raymiz. A'zo bo'lganingizdan so'ng \"Tekshirish\" tugmasini bosing.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Tekshirish", callback_data=f"checking-subscription-")]]))
+
+    else:
+        user_message = context.bot.send_message(chat_id=u.user_id, text=f"Hurmatli foydalanuvchi botdan foydalanish uchun \"A'lamiy\" telegram kanaliga a'zo bo'lishingizni so'raymiz. A'zo bo'lganingizdan so'ng \"{consts.JOINED}\" tugmasini bosing. Kanalga o'tish uchun \"Kanalga o'tish\" tugmasini bosing", reply_markup=InlineKeyboardMarkup([
+                                                [InlineKeyboardButton(consts.JOINED, callback_data=f"checking-subscription-")], [InlineKeyboardButton("Kanalga o'tish", url = "https://t.me/alamiy_uz")]]), parse_mode =  ParseMode.HTML)
         context.user_data["message_id"] = user_message.message_id
-    
-    
-    
-    
-    

@@ -24,6 +24,7 @@ def command_start(update: Update, context: CallbackContext) -> None:
     
     if chat_member['status'] == "left" :
         check_subscription(update,context, u)
+        return consts.SELECTING_ACTION
     else:
         if created:
             if context.user_data.get(consts.FROM_CHAT):

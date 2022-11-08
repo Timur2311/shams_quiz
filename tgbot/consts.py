@@ -1,6 +1,8 @@
 BACK = "Orqaga🔙"
 CANCEL = "Cancel"
 
+JOINED = "A'zo bo'ldim✅"
+
 PUBLIC = "Ochiq"
 PRIVATE = "Yopiq"
 
