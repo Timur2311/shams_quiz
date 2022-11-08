@@ -12,14 +12,7 @@ def set_up_commands(bot_instance: Bot) -> None:
             'start': 'Botni ishga tushirish',
             
         },
-        'es': {
-            'start': 'Botni ishga tushirish',
-            
-        },
-        'fr': {
-            'start': 'Botni ishga tushirish',
-            
-        },
+        
         'ru': {
             'start': 'Запустить django бота 🚀',
            
