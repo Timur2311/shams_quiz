@@ -198,14 +198,6 @@ def set_up_commands(bot_instance: Bot) -> None:
         'en': {
             'start': 'Botni ishga tushirish'
         },
-        'es': {
-            'start': 'Iniciar el bot de django 🚀',
-
-        },
-        'fr': {
-            'start': 'Démarrer le bot Django 🚀',
-
-        },
         'ru': {
             'start': 'Запустить django бота 🚀',
 
