@@ -76,6 +76,8 @@ class UserChallenge(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    in_proccecc = models.BooleanField(default=False)    
+    
     created_challenge_message_id = models.CharField(max_length=1024, null = True)
     created_challenge_chat_id = models.CharField(max_length=1024, null = True)
     

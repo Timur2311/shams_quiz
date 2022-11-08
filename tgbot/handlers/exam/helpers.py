@@ -1,5 +1,5 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from users.models import User
+
 
 from exam.models import UserExamAnswer
 

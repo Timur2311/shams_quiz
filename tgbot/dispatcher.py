@@ -57,7 +57,7 @@ def setup_dispatcher(dp):
         CallbackQueryHandler(
             challenge_handlers.revansh, pattern=r"revansh-"),
         CallbackQueryHandler(
-            challenge_handlers.challenge_confirmation, pattern=r"challenge-confirmation-"),
+            challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
 
 
 
@@ -74,9 +74,9 @@ def setup_dispatcher(dp):
             CallbackQueryHandler(
                 onboarding_handlers.home_page, pattern=r"home-page"),
             CallbackQueryHandler(
-                challenge_handlers.revansh, pattern=r"revansh-"),
+                challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
             CallbackQueryHandler(
-                challenge_handlers.challenge_confirmation, pattern=r"challenge-confirmation-")
+                    challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
         ],
 
         states={
@@ -103,6 +103,12 @@ def setup_dispatcher(dp):
                                onboarding_handlers.back_to_home_page),
                 CallbackQueryHandler(
                     exam_handler.comments, pattern=r"comments-"),
+                
+                CallbackQueryHandler(
+                    challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
+                
+                CallbackQueryHandler(
+                    challenge_handlers.challenge_callback, pattern=r"received-"),
 
             ],
             consts.SHARING_CHALLENGE: [
@@ -111,13 +117,11 @@ def setup_dispatcher(dp):
                 CallbackQueryHandler(
                     challenge_handlers.revoke_challenge, pattern=r"revoke-challenge-"),
                 CallbackQueryHandler(
-                    challenge_handlers.waiting_for_opponent, pattern=r"random-waiting-"),
-                CallbackQueryHandler(
                     challenge_handlers.random_opponent, pattern="^"+consts.RANDOM_OPPONENT),                
                 CallbackQueryHandler(
                     challenge_handlers.challenge_callback, pattern=r"received-"),
                 CallbackQueryHandler(
-                    challenge_handlers.challenge_confirmation, pattern=r"challenge-confirmation-"),
+                    challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
                 CallbackQueryHandler(
                     challenge_handlers.challenge_handler, pattern=r"question-variant-"),
                 MessageHandler(Filters.text(consts.BACK),

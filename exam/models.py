@@ -142,11 +142,10 @@ class UserExam(models.Model):
 
     def update_score(self):
         score=UserExamAnswer.objects.filter(is_correct=True, user_exam=self).count()
-        # print(f"score-----{score}")
-       
+        
         self.score = int(score)
        
-        return score
+        return int(score)
 
     def create_answers(self):
         exam_answers = []

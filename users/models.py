@@ -35,6 +35,7 @@ class User(CreateUpdateTracker):
     
     is_busy = models.BooleanField(default = False)
     is_random_opponent_waites = models.BooleanField(default = False)
+    challenge_id  =  models.CharField(max_length = 256, default = "no")
     
     
 
@@ -43,10 +44,12 @@ class User(CreateUpdateTracker):
         user_exams = self.as_owner.all()
         for user_exam in user_exams:
             self.score+=user_exam.user_score
+        self.save()
         user_challenges = self.as_opponent.all()
         
         for user_challenge in user_challenges:
             self.score+=user_challenge.opponent_score
+        self.save()
             
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'

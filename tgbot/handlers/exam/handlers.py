@@ -186,17 +186,20 @@ def exam_handler(update: Update, context: CallbackContext):
         update.callback_query.delete_message()
         
         #user ended passing test
-        user.is_busy =  False
-        user.save()
+        
         
         context.bot.send_message(
             user.user_id, f"Imtihon tugadi.\n\nTo'g'ri javoblar soni: {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh\" tugmasini bosing yoki \"Testlarga qaytish\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]))
-        #here
+        
+        
+        user.is_busy =  False
+        user.save()
+        
         if user.is_random_opponent_waites:
-            user_challenges = UserChallenge.objects.filter(user=user, is_random_opponent=True, is_active=True).exclude(opponent = None)
-            user_challenge = user_challenges.first()
-            context.bot.send_message(user.user_id , "Sizga tasodifiy raqib topildi.", reply_markup = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Boshlash", callback_data=f"challenge-confirmation-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
+            user_challenge =  UserChallenge.objects.get(id = int(user.challenge_id))
+            context.bot.send_message(user.user_id , f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
+             
 
     return consts.PASS_TEST
 
