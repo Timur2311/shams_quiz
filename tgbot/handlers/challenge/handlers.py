@@ -37,7 +37,7 @@ def stage_exams(update: Update, context: CallbackContext):
 
         user_challenge = challenge.create_user_challenge(u.user_id, challenge)
 
-        challenge_stage = update.message.reply_text(f"Siz {stage}-bosqich testlari bilan do'stingiz bilan bellashmoqchisiz.\n\n{consts.SHARE} tugmasini bosib bellashuvni biror do'stingiz bilan ulashing yoki <b>\"{consts.RANDOM_OPPONENT}\"</b> tugmasini bosing!",
+        challenge_stage = update.message.reply_text(f"Siz {stage}-bosqich savollaridan tashkil topgan bellashuvni yaratdingiz.\n\nQuyida keltirilgan usullardan birini tanlang, bunda:\n\n{consts.RANDOM_OPPONENT} - Tizimda siz tanlagan savollar bilan bellashuvni istagan qatnashchilardan tasodifiy biri tanlanib bellashuv tashkil etiladi.\n\n{consts.SHARE}  - Bu tugmani bosqanda sizdan o'z do'stingiz chatini tanlash so'raladi, tanlaganingizdan keyin u yerda sizga inline ko'rinishida taklif shakllantiriladi bunda siz uni tanlab do'stingizga yuborishingiz mumkin, agar do'stingiz siz bilan bellashishni xohlasa tugmani bosib sizga buni bildiradi.",
                                                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text=consts.SHARE, switch_inline_query=f"{user_challenge.id}")], [InlineKeyboardButton(text=consts.RANDOM_OPPONENT, callback_data=f"{consts.RANDOM_OPPONENT}-{user_challenge.id}-{u.user_id}")], [InlineKeyboardButton(consts.REVOKE, callback_data=f"revoke-challenge-{u.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
         user_challenge.created_challenge_message_id = str(
             challenge_stage.message_id)
@@ -56,7 +56,7 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
 
     user_challenge = UserChallenge.objects.get(id=int(query))
 
-    text = f"Sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilamiz!"
+    text = f"Do'stingiz sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilmoqda. Bellashuvga rozilik bildirganingizdan so'ng botga o'tib, bot orqali bellashuvni boshlashingiz mumkin "
     my_user_challenge = user_challenge
 
     results = []
@@ -103,14 +103,14 @@ def random_opponent(update: Update, context: CallbackContext):
         possible_challenge = possible_challenges.first()
         possible_challenge.opponent = opponent
         possible_challenge.save()
-        
+
         if possible_challenge.user.is_busy:
             possible_challenge.in_proccecc = True
             possible_challenge.save()
             possible_challenge.user.is_random_opponent_waites = True
             possible_challenge.user.challenge_id = str(possible_challenge.id)
             possible_challenge.user.save()
-        
+
         created_opponent_message = context.bot.send_message(chat_id=opponent.user_id, text=f"Sizga tasodifiy raqib topildi. Sizga <a href='tg://user?id={user.user_id}'>{user.name}</a> raqiblik qiladi .Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ",
                                                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{possible_challenge.id}-start-opponent-{opponent.user_id}")]]), parse_mode=ParseMode.HTML)
         possible_challenge.opponent_chat_id = created_opponent_message.chat_id
@@ -145,9 +145,9 @@ def random_opponent(update: Update, context: CallbackContext):
 def challenge_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     data = update.callback_query.data.split("-")
-    
+
     type_of_challenge = data[1]
-    
+
     received_type = data[2]
     challenge_owner_id = int(data[3])
 
@@ -193,10 +193,11 @@ def challenge_callback(update: Update, context: CallbackContext):
         if user.user_id != challenge_owner_id:
             if type_of_challenge == "revansh":
                 query.edit_message_text(
-                    f" Siz qayta bellashishni rad etdingiz.", parse_mode=ParseMode.HTML)
+                    f" Siz qayta bellashishni rad etdingiz.", reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user.user_id}")]]), parse_mode=ParseMode.HTML)
                 context.bot.send_message(chat_id=challenge_owner_id, text=f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> qayta bellashishga rozilik bildirmadi.", reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}")]]), parse_mode=ParseMode.HTML)
-                
+
             else:
                 query.edit_message_text(
                     f" <a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvga qatnashishni rad etdi.", parse_mode=ParseMode.HTML)
@@ -256,7 +257,6 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user = User.objects.get(user_id=user_id)
     user_challenge = UserChallenge.objects.get(id=user_challenge_id)
 
-    
     query.answer()
 
     if user_type == "user":
@@ -350,7 +350,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 opponent_duration = user_challenge.opponent_duration()
                 user_time = helpers.get_duration(user_duration)
                 opponent_time = helpers.get_duration(opponent_duration)
-                
+
                 if user_challenge.user_score > user_challenge.opponent_score:
                     text += f"\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:👑{user_challenge.user_score}/10  ⏳{user_time}\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:😭{user_challenge.opponent_score}/10  ⏳{opponent_time}"
                 elif user_challenge.user_score < user_challenge.opponent_score:
@@ -362,9 +362,9 @@ def challenge_handler(update: Update, context: CallbackContext):
                         text += f"\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:👑{user_challenge.opponent_score}/10  ⏳{opponent_time}\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:😭{user_challenge.user_score}/10  ⏳{user_time}"
 
                 user_message = context.bot.send_message(
-                    chat_id=user_challenge.user.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.challenge.id}-{user_challenge.user.user_id}-{user_challenge.opponent.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
+                    chat_id=user_challenge.user.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.id}-{user_challenge.user.user_id}-{user_challenge.opponent.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
                 opponent_message = context.bot.send_message(
-                    chat_id=user_challenge.opponent.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.challenge.id}-{user_challenge.opponent.user_id}-{user_challenge.user.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.opponent.user_id}--{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
+                    chat_id=user_challenge.opponent.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.id}-{user_challenge.opponent.user_id}-{user_challenge.user.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.opponent.user_id}--{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
 
                 user_challenge.user_message_id = user_message.message_id
                 user_challenge.user_chat_id = user_message.chat_id
@@ -376,7 +376,7 @@ def challenge_handler(update: Update, context: CallbackContext):
             else:
                 text += "\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga bellashuv natijalarini jo'natamiz."
                 not_finished_text = context.bot.send_message(
-                    user.user_id, text=text)
+                    user.user_id, text=text, parse_mode=ParseMode.HTML)
 
                 user_challenge.user_message_id = not_finished_text.message_id
                 user_challenge.user_chat_id = not_finished_text.chat_id
@@ -402,21 +402,21 @@ def challenge_handler(update: Update, context: CallbackContext):
                 opponent_time = helpers.get_duration(opponent_duration)
 
                 if user_challenge.user_score > user_challenge.opponent_score:
-                    # print("birinchi if ga kirdi")
+
                     text += f"\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:👑{user_challenge.user_score}/10  ⏳{user_time}\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:😭{user_challenge.opponent_score}/10  ⏳{opponent_time}"
                 elif user_challenge.user_score < user_challenge.opponent_score:
                     text += f"\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:👑{user_challenge.opponent_score}/10  ⏳{opponent_time}\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:😭{user_challenge.user_score}/10  ⏳{user_time}"
                 elif user_challenge.user_score == user_challenge.opponent_score:
-                    # print("ikkinchi if ga kirdi")
+
                     if user_duration < opponent_duration:
-                        # print("uchinchi if ga kirdi")
+
                         text += f"\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:👑{user_challenge.user_score}/10  ⏳{user_time}\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:😭{user_challenge.opponent_score}/10  ⏳{opponent_time}"
                     elif user_duration > opponent_duration:
                         text += f"\n<a href='tg://user?id={user_challenge.opponent.user_id}'>{user_challenge.opponent.name}</a>:👑{user_challenge.opponent_score}/10  ⏳{opponent_time}\n<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a>:😭{user_challenge.user_score}/10  ⏳{user_time}"
                 user_message = context.bot.send_message(
-                    chat_id=user_challenge.user.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.challenge.id}-{user_challenge.user.user_id}-{user_challenge.opponent.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
+                    chat_id=user_challenge.user.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.id}-{user_challenge.user.user_id}-{user_challenge.opponent.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.user.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
                 opponent_message = context.bot.send_message(
-                    chat_id=user_challenge.opponent.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.challenge.id}-{user_challenge.opponent.user_id}-{user_challenge.user.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.opponent.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
+                    chat_id=user_challenge.opponent.user_id, text=text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{user_challenge.id}-{user_challenge.opponent.user_id}-{user_challenge.user.user_id}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user_challenge.opponent.user_id}-{user_challenge.id}")]]), parse_mode=ParseMode.HTML)
                 user_challenge.user_message_id = user_message.message_id
                 user_challenge.user_chat_id = update.callback_query.message.chat_id
                 user_challenge.opponent_message_id = opponent_message.message_id
@@ -429,7 +429,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 text += "\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga test natijalarini jo'natamiz."
 
                 not_finished_text = context.bot.send_message(
-                    user.user_id, text=text)
+                    user.user_id, text=text, parse_mode=ParseMode.HTML)
                 user_challenge.opponent_message_id = not_finished_text.message_id
                 user_challenge.opponent_chat_id = update.callback_query.message.chat_id
                 user_challenge.save()
@@ -486,18 +486,23 @@ def revansh(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
 
-    challenge_id = int(data[1])
-
-    
+    user_challenge_id = int(data[1])
 
     from_user_id = int(data[2])
 
-
     to_user_id = int(data[3])
 
-   
+    user_challenge = UserChallenge.objects.get(id=user_challenge_id)
+
+    if user_challenge.user.user_id == to_user_id:
+        context.bot.delete_message(
+            chat_id=user_challenge.user_chat_id, message_id=user_challenge.user_message_id)
+    elif user_challenge.opponent.user_id == to_user_id:
+        context.bot.delete_message(
+            chat_id=user_challenge.opponent_chat_id, message_id=user_challenge.opponent_message_id)
+
     opponent = User.objects.get(user_id=to_user_id)
-    challenge = Challenge.objects.get(id=challenge_id)
+    challenge = Challenge.objects.get(id=user_challenge.challenge.id)
 
     context.bot.answer_callback_query(
         callback_query_id=query.id, text="Qayta bellashuv haqidagi so'rovingiz raqibingizga jo'natildi", show_alert=True)
@@ -507,8 +512,8 @@ def revansh(update: Update, context: CallbackContext):
     user_challenge.opponent = opponent
     user_challenge.save()
 
-    context.bot.send_message(chat_id=to_user_id, text="Raqibingiz siz bilan qayta bellashmoqchi. Bellashuvni qabul qilasizmi ?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text=consts.ACCEPT, callback_data=f"received-revansh-{consts.ACCEPT}-{user_challenge.user.user_id}-{user_challenge.id}")],
-                                                                                                                                                                    [InlineKeyboardButton(
-                                                                                                                                                                        text=consts.DECLINE, callback_data=f"received-revansh-{consts.DECLINE}-{user_challenge.user.user_id}-{user_challenge.id}")]
-                                                                                                                                                                    ]))
+    context.bot.send_message(chat_id=to_user_id, text=f"<a href='tg://user?id={user_challenge.user.user_id}'>{user_challenge.user.name}</a> siz bilan {user_challenge.challenge.stage}-bosqich savollarida qayta bellashmoqchi. Bellashuvni qabul qilasizmi ?", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text=consts.ACCEPT, callback_data=f"received-revansh-{consts.ACCEPT}-{user_challenge.user.user_id}-{user_challenge.id}")],
+                                                                                                                                                                                                                                                                                                   [InlineKeyboardButton(
+                                                                                                                                                                                                                                                                                                       text=consts.DECLINE, callback_data=f"received-revansh-{consts.DECLINE}-{user_challenge.user.user_id}-{user_challenge.id}")]
+                                                                                                                                                                                                                                                                                                   ]), parse_mode=ParseMode.HTML)
     return consts.SHARING_CHALLENGE

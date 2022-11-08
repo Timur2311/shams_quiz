@@ -26,7 +26,7 @@ HOME_PAGE = "Bosh Menyu"
 ADD_AGAIN = "Yana vazifa qo'shish➕"
 ADD_TASK = "Vazifa qo'shish➕"
 
-SHARE = "Do'stlar bilan ulashish🔗"
+SHARE = "Do'stim bilan ulashish🔗"
 RANDOM_OPPONENT = "Tasodifiy raqib bilan🙄"
 
 ACCEPT = "Bellashuvni qabul qilish🤝"
