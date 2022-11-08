@@ -25,8 +25,7 @@ def send_test(update, context, question, user_exam, user,type = "exam"):
     if number_of_test==1:
         context.bot.send_message(chat_id = user.user_id,text=text, reply_markup = InlineKeyboardMarkup(buttons), parse_mode = ParseMode.HTML)
         context.user_data["number_of_test"]+=1
-    else:     
-        # print(f"number=-------={context.user_data['number_of_test']}")   
+    else:      
         update.callback_query.edit_message_text(text = text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
         context.user_data["number_of_test"]+=1
     

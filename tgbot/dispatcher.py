@@ -74,8 +74,7 @@ def setup_dispatcher(dp):
                 onboarding_handlers.home_page, pattern=r"home-page"),
             CallbackQueryHandler(
                 challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
-            CallbackQueryHandler(
-                    challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
+           
         ],
 
         states={

@@ -68,7 +68,7 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
         if update.callback_query:
             update.callback_query.delete_message()
         exam_message = context.bot.send_message(
-            chat_id=u.user_id, text="Quyidagi imtihonlardan birini tanlang⬇️", reply_markup=InlineKeyboardMarkup(buttons))
+            chat_id=u.user_id, text="Quyidagi testlardan birini tanlang⬇️", reply_markup=InlineKeyboardMarkup(buttons))
         context.user_data["message_id"] = exam_message.message_id
 
     return consts.PASS_TEST
@@ -103,7 +103,6 @@ def exam_callback(update: Update, context: CallbackContext) -> None:
         message_id=update.callback_query.message.message_id,
         parse_mode=ParseMode.HTML,
         reply_markup=keyboards.test_start_confirmation(exam, user_id))
-    
 
     return consts.PASS_TEST
 
@@ -134,21 +133,21 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
             user_exam.create_answers()
             question = user_exam.last_unanswered_question()
             query.delete_message()
-            
-            #user is starting pass test
+
+            # user is starting pass test
             user.is_busy = True
             user.save()
-            
+
             query.message.reply_text(
-                f"Test boshlandi!\n\n Testlar soni: {counter} ta", reply_markup=ReplyKeyboardRemove())
+                f"<b>Test boshlandi!</b>\n\n <b>Testlar soni:</b> {counter} ta", reply_markup=ReplyKeyboardRemove(), parse_mode=ParseMode.HTML)
 
             helpers.send_test(update=update, context=context,
                               question=question, user_exam=user_exam, user=user)
 
         elif counter == 0:
             query.delete_message()
-            user_message = context.bot.send_message(chat_id=user.user_id, text="Ushbu testdagi hamma savollarga to'g'ri javob bergansiz. Qaytadan ishlashni xohlasangiz \"Qayta ishlash\" tugmasini bosing.", reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Qayta ishlash", callback_data=f"test-confirmation-{exam.id}-start-again")], [InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user.user_id}-{exam.stage}")],[InlineKeyboardButton("Bosh Sahifa", callback_data = f"home-page-{user.user_id}")],[InlineKeyboardButton("Bosqich tanlashga qaytish", callback_data=f"back-to-exam-stages-{user.user_id}")]]))
+            user_message = context.bot.send_message(chat_id=user.user_id, text="Ushbu testdagi hamma savollarga to'g'ri javob bergansiz🤩 Bilimingizni mustahkamlash uchun testlarni qaytadan ishlashni xohlasangiz \"Qayta ishlash\" tugmasini bosing.", reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Qayta ishlash", callback_data=f"test-confirmation-{exam.id}-start-again")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{exam.stage}")], [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{user.user_id}")], [InlineKeyboardButton("Bosqich tanlashga qaytish", callback_data=f"back-to-exam-stages-{user.user_id}")]]))
             context.user_data["message_id"] = user_message.message_id
 
     elif action_type == "back":
@@ -184,25 +183,20 @@ def exam_handler(update: Update, context: CallbackContext):
         user_exam.is_finished = True
         user_exam.save()
         update.callback_query.delete_message()
-        
-        #user ended passing test
-        
-        
+
         context.bot.send_message(
-            user.user_id, f"Imtihon tugadi.\n\nTo'g'ri javoblar soni: {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh\" tugmasini bosing yoki \"Testlarga qaytish\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]))
-        
-        
-        user.is_busy =  False
+            user.user_id, f"<b>Imtihon tugadi🏁</b>\n\n<b>To'g'ri javoblar soni✅:</b> {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh💬\" tugmasini bosing yoki \"Testlarga qaytish📚\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh💬", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]))
+
+        user.is_busy = False
         user.save()
-        
+
         if user.is_random_opponent_waites:
-            user_challenge =  UserChallenge.objects.get(id = int(user.challenge_id))
-            context.bot.send_message(user.user_id , f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup = InlineKeyboardMarkup(
+            user_challenge = UserChallenge.objects.get(
+                id=int(user.challenge_id))
+            context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
-             
 
     return consts.PASS_TEST
-
 
 
 def comments(update: Update, context: CallbackContext):
@@ -210,21 +204,26 @@ def comments(update: Update, context: CallbackContext):
     data = query.data.split("-")
     user_exam_id = data[1]
     user_id = data[2]
-    
-    user_exam = UserExam.objects.get(id = int(user_exam_id))
-    
-    user_exam_answers = UserExamAnswer.objects.filter(user_exam__id = int(user_exam_id)).filter(is_correct=False)
-    
+
+    user_exam = UserExam.objects.get(id=int(user_exam_id))
+
+    user_exam_answers = UserExamAnswer.objects.filter(
+        user_exam__id=int(user_exam_id)).filter(is_correct=False)
+
     buttons = []
-    
+
     for user_exam_answer in user_exam_answers:
-        buttons.append([InlineKeyboardButton(f"{user_exam_answer.number}-savol", callback_data=f"answer-{user_exam_answer.id}-{user_id}-{user_exam_id}")])
-    
-    buttons.append([InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")])
-    
-    query.edit_message_text("Noto'g'ri javob berilgan savollar ro'yxati: ", reply_markup=InlineKeyboardMarkup(buttons))
-    
+        buttons.append([InlineKeyboardButton(
+            f"{user_exam_answer.number}-savol", callback_data=f"answer-{user_exam_answer.id}-{user_id}-{user_exam_id}")])
+
+    buttons.append([InlineKeyboardButton("Testlarga qaytish📚",
+                   callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")])
+
+    query.edit_message_text("Noto'g'ri javob berilgan savollar ro'yxati: ",
+                            reply_markup=InlineKeyboardMarkup(buttons))
+
     return consts.COMMENTS
+
 
 def answer(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -232,50 +231,16 @@ def answer(update: Update, context: CallbackContext):
     user_exam_answer_id = data[1]
     user_id = data[2]
     user_exam_id = data[3]
-    user_exam = UserExam.objects.get(id = int(user_exam_id))
-    
-    user_exam_answer = UserExamAnswer.objects.get(id = int(user_exam_answer_id))
-    question_option = QuestionOption.objects.get(id = user_exam_answer.option_id)
+    user_exam = UserExam.objects.get(id=int(user_exam_id))
+
+    user_exam_answer = UserExamAnswer.objects.get(id=int(user_exam_answer_id))
+    question_option = QuestionOption.objects.get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
     true_answer = question.options.get(is_correct=True)
-    
-    
-    
-    query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob:</b> {question_option.content} \n\n <b>To'g'ri javob:</b> {true_answer.content} \n\n <b>Izoh: </b>{question.true_definition} ", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(consts.BACK, callback_data=f"comments-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode = ParseMode.HTML)
-    
-    
-    
-    
-    
+
+    query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content} \n\n <b>To'g'ri javob✅:</b> {true_answer.content} \n\n <b>Izoh💬: </b>{question.true_definition} ", reply_markup=InlineKeyboardMarkup(
+        [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode=ParseMode.HTML)
+
     return consts.COMMENTS
 
-def poll_handler(update: Update, context: CallbackContext) -> None:
-    # print("\n\n\poll handlerga kirdi \n\n")
-    # GETTING USER
-    user_id = helpers.get_chat_id(update, context)
-    user = User.objects.get(user_id=user_id)
 
-    # CHECKING ANSWER
-    is_correct = False
-    for index, option in enumerate(update.poll.options):
-        if option.voter_count >= 1:
-            if index == update.poll.correct_option_id:
-                is_correct = True
-            break
-
-    # SAVE ANSWER
-    user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
-    answer_question = user_exam.last_unanswered()
-    answer_question.is_correct = is_correct
-    answer_question.answered = True
-    answer_question.save()
-
-    user_exam.update_score()
-    user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
-
-    question = user_exam.last_unanswered_question()
-    if question:
-        helpers.send_exam_poll(context, question, user.user_id)
-    else:
-        context.bot.send_message(
-            user_id, f"Imtixon tugadi.\n\nSizning natijangiz: {user_exam.score}", reply_markup=make_keyboard_for_start_command())
