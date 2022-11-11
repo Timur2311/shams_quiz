@@ -102,6 +102,7 @@ def random_opponent(update: Update, context: CallbackContext):
         created_user_challenge.delete()
         possible_challenge = possible_challenges.first()
         possible_challenge.opponent = opponent
+        possible_challenge.users.add(opponent)
         possible_challenge.save()
 
         if possible_challenge.user.is_busy:
@@ -172,6 +173,7 @@ def challenge_callback(update: Update, context: CallbackContext):
             if type_of_challenge == "revansh":
                 user_challenge.users.add(user)
                 user_challenge.opponent = user
+                user_challenge.users.add(user)
                 user_challenge.save()
                 context.bot.send_message(chat_id=challenge_owner_id, text=f"<a href='tg://user?id={user.user_id}'>{user.name}</a> qayta bellashuvga rozi bo'ldi.Bellashuvni boshlash uchun \"Boshlash\" tugmasini bosing ", reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-user-{challenge_owner_id}")]]), parse_mode=ParseMode.HTML)
@@ -185,6 +187,8 @@ def challenge_callback(update: Update, context: CallbackContext):
                 else:
                     user_challenge.users.add(user)
                     user_challenge.opponent = user
+                    user_challenge.users.add(user)
+                    
                     user_challenge.save()
                 query.edit_message_text(
                     text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
@@ -462,7 +466,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
     context.bot.delete_message(
         chat_id=chat_id, message_id=message_id)
 
-    context.bot.send_message(chat_id=user_id, text="Quyidagi bosqichlardan birini tanlang🔽", reply_markup=ReplyKeyboardMarkup([
+    context.bot.send_message(chat_id=user_id, text="Yangi bellashuv yaratish uchun quyidagi bosqichlardan birini tanlang🔽", reply_markup=ReplyKeyboardMarkup([
         [consts.FIRST], [consts.SECOND], [consts.THIRD], [
             consts.FOURTH], [consts.FIFTH], [consts.BACK]
     ], resize_keyboard=True))
@@ -481,10 +485,11 @@ def leader(update: Update, context: CallbackContext) -> None:
         leader_users.append(leader)
 
     for index, leader_user in enumerate(leader_users):
-        text += f"\n{index+1}) {leader_user.name} - {leader_user.score}"
+        leader_challenge_count = UserChallenge.objects.filter(users = leader_user).count()
+        text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
 
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
-        [[consts.BACK]], resize_keyboard=True))
+        [[consts.BACK]], resize_keyboard=True), parse_mode=ParseMode.HTML)
 
     return consts.LEADERBOARD
 

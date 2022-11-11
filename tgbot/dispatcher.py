@@ -149,6 +149,7 @@ def setup_dispatcher(dp):
                 exam_handler.stage_exams, pattern=r"stage-exams-")]
         },
         fallbacks=[
+            selection_handlers,
             CommandHandler(
                 'start', onboarding_handlers.command_start),
         ],

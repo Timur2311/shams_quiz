@@ -85,7 +85,7 @@ class Exam(models.Model):
     content = models.TextField(max_length=2048, null=True, blank=True)
     stage = models.CharField(max_length=16, default=0)
     tour = models.CharField(max_length=16, default=0)
-    questions = models.ManyToManyField(Question)
+    questions = models.ManyToManyField(Question, related_name = "examm")
     questions_count = models.IntegerField(
         "Savollar soni", default=10)
 
