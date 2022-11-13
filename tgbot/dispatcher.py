@@ -57,7 +57,8 @@ def setup_dispatcher(dp):
             challenge_handlers.revansh, pattern=r"revansh-"),
         CallbackQueryHandler(
             challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
-
+        CommandHandler(
+            'start', onboarding_handlers.command_start),
 
 
 
@@ -74,7 +75,7 @@ def setup_dispatcher(dp):
                 onboarding_handlers.home_page, pattern=r"home-page"),
             CallbackQueryHandler(
                 challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
-           
+
         ],
 
         states={
@@ -90,7 +91,7 @@ def setup_dispatcher(dp):
                     exam_handler.exam_handler, pattern=r"question-variant-"),
                 CallbackQueryHandler(
                     onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
-                
+
                 CallbackQueryHandler(
                     exam_handler.back_to_exam_stage, pattern=r"back-to-exam-stages-"),
                 CallbackQueryHandler(
@@ -101,12 +102,14 @@ def setup_dispatcher(dp):
                                onboarding_handlers.back_to_home_page),
                 CallbackQueryHandler(
                     exam_handler.comments, pattern=r"comments-"),
-                
+
                 CallbackQueryHandler(
                     challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
-                
+
                 CallbackQueryHandler(
                     challenge_handlers.challenge_callback, pattern=r"received-"),
+                CommandHandler(
+                    'start', onboarding_handlers.command_start),
 
             ],
             consts.SHARING_CHALLENGE: [
@@ -115,7 +118,7 @@ def setup_dispatcher(dp):
                 CallbackQueryHandler(
                     challenge_handlers.revoke_challenge, pattern=r"revoke-challenge-"),
                 CallbackQueryHandler(
-                    challenge_handlers.random_opponent, pattern="^"+consts.RANDOM_OPPONENT),                
+                    challenge_handlers.random_opponent, pattern="^"+consts.RANDOM_OPPONENT),
                 CallbackQueryHandler(
                     challenge_handlers.challenge_callback, pattern=r"received-"),
                 CallbackQueryHandler(
@@ -126,27 +129,39 @@ def setup_dispatcher(dp):
                                onboarding_handlers.back_to_home_page),
                 CallbackQueryHandler(
                     challenge_handlers.revansh, pattern=r"revansh-"),
-                
+
                 CallbackQueryHandler(
                     onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
                 CallbackQueryHandler(
                     onboarding_handlers.home_page, pattern=r"home-page"),
-                
+                CommandHandler(
+                    'start', onboarding_handlers.command_start),
+
             ],
             consts.LEADERBOARD: [MessageHandler(Filters.text(consts.BACK),
-                                                onboarding_handlers.back_to_home_page), ],
+                                                onboarding_handlers.back_to_home_page),
+                                 CommandHandler(
+                'start', onboarding_handlers.command_start), ],
             consts.CONTACTING: [MessageHandler(Filters.text(consts.BACK),
-                                               onboarding_handlers.back_to_home_page), ],
+                                               onboarding_handlers.back_to_home_page),
+                                CommandHandler(
+                'start', onboarding_handlers.command_start), ],
             consts.NAME: [MessageHandler(Filters.text & ~Filters.command,
-                                         onboarding_handlers.registration), ],
+                                         onboarding_handlers.registration),
+                          CommandHandler(
+                'start', onboarding_handlers.command_start), ],
             consts.REGION: [MessageHandler(Filters.text & ~Filters.command,
-                                           onboarding_handlers.region), ],
+                                           onboarding_handlers.region),
+                            CommandHandler(
+                'start', onboarding_handlers.command_start), ],
             consts.COMMENTS: [CallbackQueryHandler(
                 exam_handler.comments, pattern=r"comments-"),
                 CallbackQueryHandler(
                 exam_handler.answer, pattern=r"answer-"),
                 CallbackQueryHandler(
-                exam_handler.stage_exams, pattern=r"stage-exams-")]
+                exam_handler.stage_exams, pattern=r"stage-exams-"),
+                CommandHandler(
+                'start', onboarding_handlers.command_start), ]
         },
         fallbacks=[
             selection_handlers,
