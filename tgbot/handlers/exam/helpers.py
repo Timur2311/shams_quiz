@@ -5,14 +5,17 @@ from exam.models import UserExamAnswer
 
 def send_test(update, context, question, user_exam, user,type = "exam"):
     
-    text = ""
+    text= f"<b>Mavzu</b>: {question.examm.all()[0].title}\n\n"
     number_of_test = context.user_data["number_of_test"]
 
     if type == "exam":
-        text+= f"<b>Mavzu</b>: {question.examm.all()[0].title}\n\n"
+        
         user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
         user_exam_answer.number = str(number_of_test)
         user_exam_answer.save()
+    
+        
+        
     text += f"<b>Savol:</b> {question.content}\n"
     variants = ["A", "B", "C"]
     buttons = []
