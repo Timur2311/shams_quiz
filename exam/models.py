@@ -91,6 +91,8 @@ class Exam(models.Model):
 
     duration = models.IntegerField("Imtixon vaqti (minut)", default=20)
 
+    def __str__(self) -> str:
+        return self.title
     class Meta:
         verbose_name = "Imtihon"
         verbose_name_plural = "Imtihonlar"
