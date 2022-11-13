@@ -66,15 +66,15 @@ def command_start(update: Update, context: CallbackContext) -> None:
 
 
 def registration(update: Update, context: CallbackContext):
-    u, created = User.get_user_and_created(update, context)
+    user, created = User.get_user_and_created(update, context)
 
     chat_member = context.bot.get_chat_member(
-        consts.CHANNEL_USERNAME, u.user_id)
+        consts.CHANNEL_USERNAME, user.user_id)
 
     if chat_member['status'] == "left":
-        check_subscription(update,context, u)
+        check_subscription(update,context, user)
     else:
-        user = User.objects.get(user_id=update.message.from_user.id)
+        
         user.name = update.message.text
         user.save()
 
