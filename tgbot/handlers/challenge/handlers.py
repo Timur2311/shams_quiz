@@ -488,9 +488,11 @@ def leader(update: Update, context: CallbackContext) -> None:
 
     for index, leader_user in enumerate(leader_users):
         leader_challenge_count = UserChallenge.objects.filter(users = leader_user).count()
-        if u.user_id == leader_user.user_id:
-            text+="✅"
-        text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
+        if u.user_id == leader_user.user_id:    
+            text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
+        else:
+            text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
+            
 
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
         [[consts.BACK]], resize_keyboard=True), parse_mode=ParseMode.HTML)
