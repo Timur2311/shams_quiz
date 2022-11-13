@@ -475,6 +475,8 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
 
 def leader(update: Update, context: CallbackContext) -> None:
+    u, _ = User.get_user_and_created(update, context)
+    
     users = User.objects.all()
     text = "Top foydalanuvchilar:\n"
     for user in users:
@@ -486,6 +488,8 @@ def leader(update: Update, context: CallbackContext) -> None:
 
     for index, leader_user in enumerate(leader_users):
         leader_challenge_count = UserChallenge.objects.filter(users = leader_user).count()
+        if u.user_id == leader_user.user_id:
+            text+="✅"
         text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
 
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
