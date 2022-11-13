@@ -26,7 +26,7 @@ def send_stacktrace_to_tg_chat(update: Update, context: CallbackContext) -> None
     )
 
     user_message = """
-😔 Botda texnik nosozlik yuz berdi. Buning uchun sizdan uzur so'raymiz. Botni qaytadan ishga tushirish uchun /start ni bosing.
+😔 Botda texnik nosozlik yuz berdi. Buning uchun sizdan uzur so'raymiz. Botni qayta ishga tushirib sizga e'lon beramiz
 """
     context.bot.send_message(
         chat_id=u.user_id,
