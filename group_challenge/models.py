@@ -86,6 +86,8 @@ class UserChallenge(models.Model):
     user_chat_id = models.CharField(max_length=1024, null = True)
     opponent_chat_id = models.CharField(max_length=1024, null = True)
     
+    def __str__(self) -> str:
+        return self.is_active
     
     
     def user_duration(self):
