@@ -17,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = [
         'user_id', 'username', 'first_name', 'last_name', 
         'language_code', 'deep_link',
-        'created_at', 'updated_at', "is_blocked_bot",
+        'created_at', 'updated_at', "is_blocked_bot","is_random_opponent_waites","is_busy"
     ]
     list_filter = ["is_blocked_bot", ]
     search_fields = ('username', 'user_id')
