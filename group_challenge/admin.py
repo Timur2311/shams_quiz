@@ -6,6 +6,6 @@ from django.contrib import admin
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
     list_display = [
-        "user","opponent","challenge","is_random_opponent","created_challenge_message_id","created_challenge_chat_id",
+        "user","opponent","challenge","is_random_opponent","created_challenge_message_id","created_challenge_chat_id","in_proccecc","is_active"
     ]
     
