@@ -89,7 +89,7 @@ def random_opponent(update: Update, context: CallbackContext):
         'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     user_random_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related(
-        'opponent').select_related('challenge').filter(user__user_id=from_user_id, stage=created_user_challenge.challenge.stage, is_active=True, opponent=None)
+        'opponent').select_related('challenge').filter(user__user_id=from_user_id, challenge__stage=created_user_challenge.challenge.stage, is_active=True, opponent=None)
 
     possible_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(
         is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.get(user_id=from_user_id)).exclude(in_proccecc=True)
