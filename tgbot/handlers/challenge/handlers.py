@@ -469,16 +469,15 @@ def leader(update: Update, context: CallbackContext) -> None:
         leader_users.append(leader)
 
     for index, leader_user in enumerate(leader_users):
-        leader_challenge_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = leader_user).count()
         
         if u.user_id == leader_user.user_id:    
-            text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"        
+            text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"        
         else:
-            text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
+            text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
     
     for number, user in enumerate(users):
         if u.user_id == user.user_id and u not in leader_users:
-            simple_user_text = f"\n\n{number})✅ {user.name}"
+            simple_user_text = f"\n\n{number})✅ <b>{user.name}</b>: \nUmumiy to'plangan ball🧮 - {u.score}\nUmumiy bellashuvlar soni⚔️: {u.challenges_count}\n"
     
     text+=simple_user_text
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
