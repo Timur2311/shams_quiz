@@ -235,7 +235,7 @@ def answer(update: Update, context: CallbackContext):
     user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(id=user_exam_answer_id)
     question_option = QuestionOption.objects.select_related('question').get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
-    true_answer = question.options.get(is_correct=True)
+    true_answer = QuestionOption.objects.select_related('question').filter(question = question).get(is_correct=True)
 
     query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content} \n\n <b>To'g'ri javob✅:</b> {true_answer.content} \n\n <b>Izoh💬: </b>{question.true_definition} ", reply_markup=InlineKeyboardMarkup(
         [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode=ParseMode.HTML)
