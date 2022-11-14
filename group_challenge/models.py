@@ -1,6 +1,3 @@
-
-from datetime import datetime
-from email.policy import default
 from django.db import models
 from users.models import User
 from tgbot import consts
@@ -109,11 +106,11 @@ class UserChallenge(models.Model):
 
     def update_score(self, type):
         if type == 'user':
-            score = UserChallengeAnswer.objects.filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
             self.user_score = int(score)
             
         elif type == "opponent":
-            score = UserChallengeAnswer.objects.filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
             self.opponent_score = int(score)
             
             

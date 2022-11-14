@@ -164,9 +164,9 @@ def setup_dispatcher(dp):
                 'start', onboarding_handlers.command_start), ]
         },
         fallbacks=[
-            selection_handlers,
             CommandHandler(
                 'start', onboarding_handlers.command_start),
+            selection_handlers
         ],
     )
 

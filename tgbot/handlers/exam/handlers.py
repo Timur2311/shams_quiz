@@ -22,7 +22,7 @@ def exam_start(update: Update, context: CallbackContext) -> None:
     TODO:
     - Pagination
     """
-    exams = Exam.objects.all()
+    exams = Exam.objects.prefetch_related('questions').all()
     inline_keyboard = keyboards.exam_keyboard(exams)
 
     if update.callback_query:
@@ -54,11 +54,11 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
     else:
         if update.callback_query:
             data = update.callback_query.data.split("-")
-            stage = data[3]
+            stage = int(data[3])
         else:
             stage = update.message.text[0]
 
-        exams = Exam.objects.filter(stage=stage)
+        exams = Exam.objects.prefetch_related('questions').filter(stage=stage)
         buttons = []
         for exam in exams:
             buttons.append([InlineKeyboardButton(
@@ -77,25 +77,25 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
 def back_to_exam_stage(update: Update, context: CallbackContext):
 
     data = update.callback_query.data.split("-")
-    user_id = data[4]
+    user_id = int(data[4])
 
-    context.bot.delete_message(chat_id=update.callback_query.message.chat_id,
-                               message_id=context.user_data["message_id"])
+    update.callback_query.message.delete()
+    
     context.bot.send_message(chat_id=user_id, text="Quyidagilardan birini tanlang⬇️", reply_markup=ReplyKeyboardMarkup([
         [consts.FIRST], [consts.SECOND], [consts.THIRD], [
             consts.FOURTH], [consts.FIFTH], [consts.BACK]
     ], resize_keyboard=True))
-    pass
+    
 
 
 def exam_callback(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     data = update.callback_query.data.split("-")
-    exam_id = data[2]
-    user_id = data[3]
+    exam_id = int(data[2])
+    user_id = int(data[2])
 
     query.answer()
-    exam = Exam.objects.get(id=exam_id)
+    exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
     text = f"<b>{exam.title}</b> \n\n<b>Testni boshlaymizmi?</b>"
     context.bot.edit_message_text(
         text=text,
@@ -112,7 +112,7 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
 
     query = update.callback_query
     data = update.callback_query.data.split("-")
-    exam_id = data[2]
+    exam_id = int(data[2])
     action_type = data[3]
 
     query.answer()
@@ -122,13 +122,12 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
             again = data[4]
         else:
             again = None
-        exam = Exam.objects.get(id=exam_id)
+        exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
         user_exam, counter = exam.create_user_exam(user, again)
 
         context.user_data["number_of_test"] = 1
         context.user_data["questions_count"] = counter
 
-        # context.bot_data[update.callback_query.from_user.id] = update.callback_query.from_user
         if counter > 0:
             user_exam.create_answers()
             question = user_exam.last_unanswered_question()
@@ -158,15 +157,15 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
 
 def exam_handler(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
-    question_id = data[2]
-    question_option_id = data[3]
-    user_exam_id = data[4]
+    question_id = int(data[2])
+    question_option_id = int(data[3])
+    user_exam_id = int(data[4])
 
     user, _ = User.get_user_and_created(update, context)
-    question_option = QuestionOption.objects.get(id=question_option_id)
-    user_exam_answer = UserExamAnswer.objects.get(
+    question_option = QuestionOption.objects.select_related('question').get(id=question_option_id)
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(
         user_exam__id=user_exam_id, question__id=question_id)
-    user_exam = UserExam.objects.get(id=user_exam_id)
+    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
 
     user_exam_answer.is_correct = question_option.is_correct
     user_exam_answer.option_id = question_option.id
@@ -202,13 +201,13 @@ def exam_handler(update: Update, context: CallbackContext):
 def comments(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
-    user_exam_id = data[1]
-    user_id = data[2]
+    user_exam_id = int(data[1])
+    user_id = int(data[2])
 
-    user_exam = UserExam.objects.get(id=int(user_exam_id))
+    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
 
-    user_exam_answers = UserExamAnswer.objects.filter(
-        user_exam__id=int(user_exam_id)).filter(is_correct=False)
+    user_exam_answers = UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
+        user_exam__id=user_exam_id).filter(is_correct=False)
 
     buttons = []
 
@@ -228,13 +227,13 @@ def comments(update: Update, context: CallbackContext):
 def answer(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
-    user_exam_answer_id = data[1]
-    user_id = data[2]
-    user_exam_id = data[3]
-    user_exam = UserExam.objects.get(id=int(user_exam_id))
+    user_exam_answer_id = int(data[1])
+    user_id = int(data[2])
+    user_exam_id = int(data[3])
+    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
 
-    user_exam_answer = UserExamAnswer.objects.get(id=int(user_exam_answer_id))
-    question_option = QuestionOption.objects.get(id=user_exam_answer.option_id)
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(id=user_exam_answer_id)
+    question_option = QuestionOption.objects.select_related('question').get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
     true_answer = question.options.get(is_correct=True)
 
