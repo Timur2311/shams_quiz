@@ -43,7 +43,7 @@ class User(CreateUpdateTracker):
 
 
     def set_user_score(self):
-        user_exams = self.prefetch_related('as_owner').all()
+        user_exams = self.select_related('as_owner').all()
         user_challenges = self.prefetch_related('as_opponent').all()
         challenges_count = self.prefetch_related('user_challenges').all().count()
         
