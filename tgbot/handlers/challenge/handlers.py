@@ -474,9 +474,9 @@ def leader(update: Update, context: CallbackContext) -> None:
         else:
             text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"
     
-    for index, user in enumerate(users):
-        if u.user_id == user.user_id and u not in users:
-            simple_user_text = f"\n\n{index})✅ {user.name}"
+    for number, user in enumerate(users):
+        if u.user_id == user.user_id and u not in leader_users:
+            simple_user_text = f"\n\n{number})✅ {user.name}"
     
     text+=simple_user_text
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
