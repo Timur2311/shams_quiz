@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from group_challenge.models import UserChallenge
 
 from typing import Union, Optional, Tuple
 
@@ -44,9 +43,13 @@ class User(CreateUpdateTracker):
 
 
     def set_user_score(self):
-        user_exams = self.as_owner.all()
+        user_exams = self.prefetch_related('as_owner').all()
+        user_challenges = self.prefetch_related('as_opponent').all()
+        challenges_count = self.prefetch_related('user_challenges').all().count()
+        
+        
+        
         score = 0
-        challenges_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = self).count()
         self.challenges_count =  challenges_count
         
         
@@ -54,7 +57,6 @@ class User(CreateUpdateTracker):
         for user_exam in user_exams:
             score+=user_exam.user_score
         
-        user_challenges = self.as_opponent.all()
         
         for user_challenge in user_challenges:
             score+=user_challenge.opponent_score
