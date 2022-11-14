@@ -1,5 +1,6 @@
 from __future__ import annotations
-from email.policy import default
+
+from group_challenge.models import UserChallenge
 
 from typing import Union, Optional, Tuple
 
@@ -30,8 +31,10 @@ class User(CreateUpdateTracker):
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
     name = models.CharField(max_length=128, null=True, blank=True, default="IsmiGul")
-    score = models.IntegerField(default=0)
     region = models.CharField(max_length = 32, null=True)
+    
+    score = models.IntegerField(default=0)
+    challenges_count = models.IntegerField(default=0)
     
     is_busy = models.BooleanField(default = False)
     is_random_opponent_waites = models.BooleanField(default = False)
@@ -43,6 +46,10 @@ class User(CreateUpdateTracker):
     def set_user_score(self):
         user_exams = self.as_owner.all()
         score = 0
+        challenges_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = self).count()
+        self.challenges_count =  challenges_count
+        
+        
         
         for user_exam in user_exams:
             score+=user_exam.user_score
@@ -55,6 +62,8 @@ class User(CreateUpdateTracker):
         if score>self.score:
             self.score = score
             self.save()
+            
+        
             
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'

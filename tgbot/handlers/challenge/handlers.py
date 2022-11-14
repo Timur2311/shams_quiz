@@ -462,6 +462,7 @@ def leader(update: Update, context: CallbackContext) -> None:
     simple_user_text = ""
     for user in users:
         user.set_user_score()
+        
 
     leader_users = []
     for leader in users[:10]:
@@ -469,6 +470,7 @@ def leader(update: Update, context: CallbackContext) -> None:
 
     for index, leader_user in enumerate(leader_users):
         leader_challenge_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = leader_user).count()
+        
         if u.user_id == leader_user.user_id:    
             text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_challenge_count}\n"        
         else:
