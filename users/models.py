@@ -44,22 +44,23 @@ class User(CreateUpdateTracker):
 
 
     def set_user_score(self):
-        user_exams = self.as_owner.all()
-        user_challenges = self.as_opponent.all()
+        user_challenges = self.as_owner.all()
+        opponent_challenges = self.as_opponent.all()
         challenges_count = self.user_challenges.all().count()
+        self.challenges_count =  challenges_count
+        self.save()
         
         
         
         score = 0
-        self.challenges_count =  challenges_count
         
         
         
-        for user_exam in user_exams:
+        for user_exam in user_challenges:
             score+=user_exam.user_score
         
         
-        for user_challenge in user_challenges:
+        for user_challenge in opponent_challenges:
             score+=user_challenge.opponent_score
             
         if score>self.score:
