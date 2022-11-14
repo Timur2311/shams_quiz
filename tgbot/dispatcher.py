@@ -127,6 +127,8 @@ def setup_dispatcher(dp):
                     challenge_handlers.challenge_handler, pattern=r"question-variant-"),
                 MessageHandler(Filters.text(consts.BACK),
                                onboarding_handlers.back_to_home_page),
+                MessageHandler(Filters.text(consts.HOME_PAGE),
+                               onboarding_handlers.back_to_home_page),
                 CallbackQueryHandler(
                     challenge_handlers.revansh, pattern=r"revansh-"),
 

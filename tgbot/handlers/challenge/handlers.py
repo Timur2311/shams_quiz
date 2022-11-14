@@ -33,7 +33,8 @@ def stage_exams(update: Update, context: CallbackContext):
         check_subscription(update, context, u)
     else:
         stage = update.message.text[0]
-        challenge = Challenge.objects.prefetch_related('questions').get(stage=stage)
+        challenge = Challenge.objects.prefetch_related(
+            'questions').get(stage=stage)
 
         user_challenge = challenge.create_user_challenge(u.user_id, challenge)
 
@@ -54,7 +55,8 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
     if query == "":
         return
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=int(query))
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+        'users').select_related('user').select_related('opponent').select_related('challenge').get(id=int(query))
 
     text = f"Do'stingiz sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilmoqda. Bellashuvga rozilik bildirganingizdan so'ng botga o'tib, bot orqali bellashuvni boshlashingiz mumkin "
     my_user_challenge = user_challenge
@@ -82,7 +84,11 @@ def random_opponent(update: Update, context: CallbackContext):
     data = query.data.split("-")
 
     user_challenge_id = int(data[1])
-    created_user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    created_user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+        'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+
+    user_random_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related(
+        'opponent').select_related('challenge').filter(user__user_id=from_user_id, stage=created_user_challenge.challenge.stage, is_active=True, opponent=None)
 
     from_user_id = int(data[2])
     possible_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(
@@ -91,8 +97,14 @@ def random_opponent(update: Update, context: CallbackContext):
     if possible_challenges.count() == 0:
         created_user_challenge.is_random_opponent = True
         created_user_challenge.save()
-        my_message = update.callback_query.edit_message_text("Hozircha siz uchun raqib yo'q. Raqib topilishi bilan sizga xabar jo'natamiz.", reply_markup=InlineKeyboardMarkup([
-                                                             [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{from_user_id}")]]))
+        if user_random_challenges.count() == 0:
+            my_message = update.callback_query.edit_message_text(f"Hozircha siz uchun raqib yo'q. Raqib topilishi bilan sizga xabar jo'natamiz. \n\n⚠️Raqib topilishini kutishni xohlamasangiz \"{consts.REVOKE}\" tugmasini bosing, aks holda \"Bosh Sahifa\" tugmasi orqali botdan foydalanishda davom etishingiz mumkin.", reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{from_user_id}")], [InlineKeyboardButton(consts.REVOKE, callback_data=f"revoke-challenge-{from_user_id}-{created_user_challenge.id}")]]))
+        elif user_random_challenges.count() == 1:
+            my_message = update.callback_query.edit_message_text(f"{created_user_challenge.challenge.stage} - bosqich savollari bo'yicha sizga raqib qidirilmoqda, biror raqib ushbu bosqich savollari bo'yicha bellashishni istashi bilan sizga xabar beramiz. ⚠️Agar kutishni xohlamasangiz \"{consts.REVOKE}\" tugmasi orqali bellashuvni bekor qilishingiz mumkin,aks holda \"Bosh Sahifa\" tugmasi orqali botdan foydalanishda davom etishingiz mumkin.", reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("Bosh Sahifa", callback_data=f"home-page-{from_user_id}")], [InlineKeyboardButton(consts.REVOKE, callback_data=f"revoke-challenge-{from_user_id}-{user_random_challenges.first().id}")]]))
+            created_user_challenge.delete()
+            
         context.user_data["message_id"] = my_message.message_id
 
     elif possible_challenges.count() >= 1:
@@ -121,8 +133,6 @@ def random_opponent(update: Update, context: CallbackContext):
     return consts.SHARING_CHALLENGE
 
 
-
-
 def challenge_callback(update: Update, context: CallbackContext):
     query = update.callback_query
     data = update.callback_query.data.split("-")
@@ -134,7 +144,8 @@ def challenge_callback(update: Update, context: CallbackContext):
 
     user_challenge_id = int(data[4])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     user, _ = User.get_user_and_created(update, context)
 
@@ -149,7 +160,7 @@ def challenge_callback(update: Update, context: CallbackContext):
     elif received_type == consts.ACCEPT:
 
         if user.user_id != challenge_owner_id:
-            
+
             if type_of_challenge == "revansh":
                 user_challenge.users.add(user)
                 user_challenge.opponent = user
@@ -162,13 +173,14 @@ def challenge_callback(update: Update, context: CallbackContext):
                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-challenge-{user_challenge.id}-start-opponent-{user.user_id}")]]), parse_mode=ParseMode.HTML)
             elif type_of_challenge == "challenge":
                 if user_challenge.opponent is not None:
-                    query.edit_message_text("Afsuski do'stingiz boshqasi bilan bellashmoqda. https://t.me/shamsquizbot botimiz orqali bellashuv yaratishingiz hamda do'stingiz bilan bellashishingiz mumkin.")
+                    query.edit_message_text(
+                        "Afsuski do'stingiz boshqasi bilan bellashmoqda. https://t.me/shamsquizbot botimiz orqali bellashuv yaratishingiz hamda do'stingiz bilan bellashishingiz mumkin.")
                     return
                 else:
                     user_challenge.users.add(user)
                     user_challenge.opponent = user
                     user_challenge.users.add(user)
-                    
+
                     user_challenge.save()
                 query.edit_message_text(
                     text=f"<a href='tg://user?id={query.from_user.id}'>{user.name}</a> bellashuvni qabul qildi.", parse_mode=ParseMode.HTML)
@@ -200,7 +212,8 @@ def user_check(update: Update, context: CallbackContext):
     user_challenge_id = data[1]
     user_challenge_id = int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
     challenge_owner_id = data[2]
     challenge_owner_id = int(challenge_owner_id)
 
@@ -246,7 +259,8 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_id = int(data[5])
 
     user = User.objects.get(user_id=user_id)
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     query.answer()
 
@@ -300,13 +314,15 @@ def challenge_handler(update: Update, context: CallbackContext):
 
     user = User.objects.get(user_id=from_user_id)
 
-    question_option = QuestionOption.objects.select_related('question').get(id=question_option_id)
+    question_option = QuestionOption.objects.select_related(
+        'question').get(id=question_option_id)
 
-    user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(
+    user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').filter(
         user_challenge__id=user_challenge_id).filter(question__id=question_id).filter(user=user)
     user_challenge_answer = user_challenge_answers[0]
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     text = f"<b>Bellashuv turi:</b> {user_challenge.challenge.stage}-bosqich savollari. "
 
@@ -365,9 +381,9 @@ def challenge_handler(update: Update, context: CallbackContext):
 
                 return ConversationHandler.END
             else:
-                text += "\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga bellashuv natijalarini jo'natamiz."
+                text += f"\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga bellashuv natijalarini jo'natamiz.\n\nRaqibingiz tugatishini kutib o'tirmaslik uchun quyidagi \"{consts.HOME_PAGE}\" tugmasi orqali botdan foydalanishni davom ettirishingiz mumkin."
                 not_finished_text = context.bot.send_message(
-                    user.user_id, text=text, parse_mode=ParseMode.HTML)
+                    user.user_id, text=text, reply_markup = ReplyKeyboardMarkup([[consts.HOME_PAGE]]) , parse_mode=ParseMode.HTML)
 
                 user_challenge.user_message_id = not_finished_text.message_id
                 user_challenge.user_chat_id = not_finished_text.chat_id
@@ -417,10 +433,10 @@ def challenge_handler(update: Update, context: CallbackContext):
                 return ConversationHandler.END
 
             else:
-                text += "\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga test natijalarini jo'natamiz."
+                text += f"\nRaqibingiz hali tugatmadi. Raqibingiz tugatishi bilanoq sizga test natijalarini jo'natamiz.\n\nRaqibingiz tugatishini kutib o'tirmaslik uchun quyidagi \"{consts.HOME_PAGE}\" tugmasi orqali botdan foydalanishni davom ettirishingiz mumkin"
 
                 not_finished_text = context.bot.send_message(
-                    user.user_id, text=text, parse_mode=ParseMode.HTML)
+                    user.user_id, text=text, reply_markup = ReplyKeyboardMarkup([[consts.HOME_PAGE]]),parse_mode=ParseMode.HTML)
                 user_challenge.opponent_message_id = not_finished_text.message_id
                 user_challenge.opponent_chat_id = update.callback_query.message.chat_id
                 user_challenge.save()
@@ -438,7 +454,8 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
     user_id = int(user_id)
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
     message_id = user_challenge.created_challenge_message_id
     chat_id = user_challenge.created_challenge_chat_id
     user_challenge.delete()
@@ -456,30 +473,29 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
 def leader(update: Update, context: CallbackContext) -> None:
     u, _ = User.get_user_and_created(update, context)
-    
+
     users = User.objects.all().order_by('-score')
     text = "Top foydalanuvchilar:\n"
     simple_user_text = ""
     for user in users:
         user.set_user_score()
-        
 
     leader_users = []
     for leader in users[:10]:
         leader_users.append(leader)
 
     for index, leader_user in enumerate(leader_users):
-        
-        if u.user_id == leader_user.user_id:    
-            text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"        
+
+        if u.user_id == leader_user.user_id:
+            text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
         else:
             text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
-    
+
     for number, user in enumerate(users):
         if u.user_id == user.user_id and u not in leader_users:
             simple_user_text = f"\n\n{number})✅ <b>{user.name}</b>: \nUmumiy to'plangan ball🧮 - {u.score}\nUmumiy bellashuvlar soni⚔️: {u.challenges_count}\n"
-    
-    text+=simple_user_text
+
+    text += simple_user_text
     update.message.reply_text(text=text, reply_markup=ReplyKeyboardMarkup(
         [[consts.BACK]], resize_keyboard=True), parse_mode=ParseMode.HTML)
 
@@ -496,7 +512,8 @@ def revansh(update: Update, context: CallbackContext):
 
     to_user_id = int(data[3])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     if user_challenge.user.user_id == to_user_id:
         context.bot.delete_message(
@@ -506,7 +523,8 @@ def revansh(update: Update, context: CallbackContext):
             chat_id=user_challenge.opponent_chat_id, message_id=user_challenge.opponent_message_id)
 
     opponent = User.objects.get(user_id=to_user_id)
-    challenge = Challenge.objects.prefetch_related('questions').get(id=user_challenge.challenge.id)
+    challenge = Challenge.objects.prefetch_related(
+        'questions').get(id=user_challenge.challenge.id)
 
     context.bot.answer_callback_query(
         callback_query_id=query.id, text="Qayta bellashuv haqidagi so'rovingiz raqibingizga jo'natildi", show_alert=True)
