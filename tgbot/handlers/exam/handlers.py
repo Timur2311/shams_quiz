@@ -2,13 +2,13 @@
 
 from telegram import ParseMode, Update, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
-from group_challenge.models import UserChallenge
+from group_challenge.models import UserChallenge, UserChallengeAnswer
 from tgbot import consts
 
 from tgbot.handlers.exam import static_text
 from users.models import User
 from exam.models import Exam, QuestionOption, UserExam, UserExamAnswer
-from exam.models import Question
+
 from tgbot.handlers.exam import keyboards
 from tgbot.handlers.exam import helpers
 
@@ -37,8 +37,8 @@ def exam_start(update: Update, context: CallbackContext) -> None:
 
 def passing_test(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Quyidagi bosqichlardan birini tanlang", reply_markup=ReplyKeyboardMarkup([
-        [consts.FIRST], [consts.SECOND], [consts.THIRD], [
-            consts.FOURTH], [consts.FIFTH], [consts.BACK]
+        [consts.FIRST, consts.SECOND], [consts.THIRD,
+                                        consts.FOURTH], [consts.FIFTH, consts.BACK]
     ], resize_keyboard=True))
 
     return consts.PASS_TEST
@@ -80,12 +80,11 @@ def back_to_exam_stage(update: Update, context: CallbackContext):
     user_id = int(data[4])
 
     update.callback_query.message.delete()
-    
+
     context.bot.send_message(chat_id=user_id, text="Quyidagilardan birini tanlang⬇️", reply_markup=ReplyKeyboardMarkup([
-        [consts.FIRST], [consts.SECOND], [consts.THIRD], [
-            consts.FOURTH], [consts.FIFTH], [consts.BACK]
+        [consts.FIRST, consts.SECOND], [consts.THIRD,
+                                        consts.FOURTH], [consts.FIFTH, consts.BACK]
     ], resize_keyboard=True))
-    
 
 
 def exam_callback(update: Update, context: CallbackContext) -> None:
@@ -162,10 +161,12 @@ def exam_handler(update: Update, context: CallbackContext):
     user_exam_id = int(data[4])
 
     user, _ = User.get_user_and_created(update, context)
-    question_option = QuestionOption.objects.select_related('question').get(id=question_option_id)
+    question_option = QuestionOption.objects.select_related(
+        'question').get(id=question_option_id)
     user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(
         user_exam__id=user_exam_id, question__id=question_id)
-    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
+    user_exam = UserExam.objects.prefetch_related(
+        'questions').get(id=user_exam_id)
 
     user_exam_answer.is_correct = question_option.is_correct
     user_exam_answer.option_id = question_option.id
@@ -184,42 +185,109 @@ def exam_handler(update: Update, context: CallbackContext):
         update.callback_query.delete_message()
 
         context.bot.send_message(
-            user.user_id, f"<b>Imtihon tugadi🏁</b>\n\n<b>To'g'ri javoblar soni✅:</b> {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh💬\" tugmasini bosing yoki \"Testlarga qaytish📚\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh💬", callback_data=f"comments-{user_exam.id}-{user_exam.user.user_id}")]]), parse_mode = ParseMode.HTML)
+            user.user_id, f"<b>Imtihon tugadi🏁</b>\n\n<b>To'g'ri javoblar soni✅:</b> {score} ta\n\nNoto'g'ri berilgan javoblaringizning izohlarini ko'rish uchun \"Izoh💬\" tugmasini bosing yoki \"Testlarga qaytish📚\" tugmasi orqali bilimingizni oshirishda davom eting!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user.user_id}-{user_exam.exam.stage}")], [InlineKeyboardButton("Izoh💬", callback_data=f"comments-exam-{user_exam.id}-{user_exam.user.user_id}")]]), parse_mode=ParseMode.HTML)
 
         user.is_busy = False
         user.save()
+        
+        if user.is_ended_challenge_waites:
+            ended_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+                'user').select_related('opponent').select_related('challenge').filter(users=user, is_active=False).filter(is_waited_challenge=True)
+            for ended_challenge in ended_challenges:
+                opponent = ended_challenge.user
+                if ended_challenge.user.user_id == user.user_id:
+                    opponent = ended_challenge.opponent
 
+                text = f"Avvalroq {ended_challenge.challenge.stage}-bosqich bo'yicha <a href='tg://user?id={opponent.user_id}'>{opponent.name}</a> bilan bellashuvingiz natijasi:\n\n"
+                if ended_challenge.winner.user_id == user.user_id:
+                    text += f"\n<a href='tg://user?id={user.user_id}'>{user.name}</a>:👑{ended_challenge.user_score}/10  ⏳{ended_challenge.user_timer}\n<a href='tg://user?id={opponent.user_id}'>{opponent.name}</a>:😭{ended_challenge.opponent_score}/10  ⏳{ended_challenge.opponent_timer}"
+                else:
+                    text += f"\n<a href='tg://user?id={opponent.user_id}'>{opponent.name}</a>:👑{ended_challenge.opponent_score}/10  ⏳{ended_challenge.opponent_timer}\n<a href='tg://user?id={user.user_id}'>{user.name}</a>:😭{ended_challenge.user_score}/10  ⏳{ended_challenge.user_timer}"
+
+                text += "\n⚠️Raqib bilan qayta bellashish uchun \"Qayta bellashish\" tugmasini bosing\nBellashuvdagi yo'l qo'ygan xatolaringizni bilish uchun esa \"Noto'g'ri javoblar\" tugmasini bosing.\n Ushbu xabarni o'chirish uchun \"Yashirish\" tugmasini bosing."
+
+                context.bot.send_message(chat_id=user.user_id, text=text, reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("Qayta bellashish", callback_data=f"revansh-{ended_challenge.id}-{user.user_id}-{opponent.user_id}")], [InlineKeyboardButton("Noto'g'ri javoblar", callback_data=f"comments-challenge-{ended_challenge.id}-{user.user_id}")], [InlineKeyboardButton("Yashirish", callback_data=f"hide-{user.user_id}")]]), parse_mode=ParseMode.HTML)
+                ended_challenge.is_waited_challenge = False
+                ended_challenge.save()
+                user.is_ended_challenge_waites = False
+                user.save()
+            return consts.COMMENTS
         if user.is_random_opponent_waites:
             user_challenge = UserChallenge.objects.get(
                 id=int(user.challenge_id))
             context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
-
     return consts.PASS_TEST
 
 
 def comments(update: Update, context: CallbackContext):
     query = update.callback_query
     data = query.data.split("-")
-    user_exam_id = int(data[1])
-    user_id = int(data[2])
+    type = data[1]
+    if type == "exam":
+        user_exam_id = int(data[2])
 
-    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
+        user_id = int(data[3])
 
-    user_exam_answers = UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
-        user_exam__id=user_exam_id).filter(is_correct=False)
+        user_exam = UserExam.objects.prefetch_related(
+            'questions').get(id=user_exam_id)
 
-    buttons = []
+        user_exam_answers = UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
+            user_exam__id=user_exam_id).filter(is_correct=False)
 
-    for user_exam_answer in user_exam_answers:
+        buttons = []
+
+        for user_exam_answer in user_exam_answers:
+            buttons.append([InlineKeyboardButton(
+                f"{user_exam_answer.number}-savol", callback_data=f"answer-{user_exam_answer.id}-{user_id}-{user_exam_id}")])
+
+        buttons.append([InlineKeyboardButton("Testlarga qaytish📚",
+                                             callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")])
+
+        query.edit_message_text("Noto'g'ri javob berilgan savollar ro'yxati: ",
+                                reply_markup=InlineKeyboardMarkup(buttons))
+    elif type == "challenge":
+        # here
+        user_challenge_id = int(data[2])
+
+        user_id = int(data[3])
+
+        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').filter(
+            user_challenge__id=user_challenge_id).filter(user_challenge__id=user_challenge_id, user__user_id=user_id, is_correct=False)
+
+        buttons = []
+
+        for user_challenge_answer in user_challenge_answers:
+            buttons.append([InlineKeyboardButton(
+                f"{user_challenge_answer.number}-savol", callback_data=f"incorrects-{user_challenge_answer.id}-{user_id}-{user_challenge_id}")])
+
         buttons.append([InlineKeyboardButton(
-            f"{user_exam_answer.number}-savol", callback_data=f"answer-{user_exam_answer.id}-{user_id}-{user_exam_id}")])
+            "Bosh Sahifa", callback_data=f"home-page-{user_id}")])
 
-    buttons.append([InlineKeyboardButton("Testlarga qaytish📚",
-                   callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")])
+        query.edit_message_text("Noto'g'ri javob berilgan savollar ro'yxati: ",
+                                reply_markup=InlineKeyboardMarkup(buttons))
 
-    query.edit_message_text("Noto'g'ri javob berilgan savollar ro'yxati: ",
-                            reply_markup=InlineKeyboardMarkup(buttons))
+    return consts.COMMENTS
+
+
+def challenge_answer(update: Update, context: CallbackContext):
+    query = update.callback_query
+    data = query.data.split("-")
+    user_challenge_answer_id = int(data[1])
+    user_id = int(data[2])
+    user_challenge_id = int(data[3])
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+        'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+
+    user_challenge_answer = UserChallengeAnswer.objects.select_related(
+        'user_challenge', 'user', 'question').get(id=user_challenge_answer_id)
+    question_option = QuestionOption.objects.select_related(
+        'question').get(id=user_challenge_answer.option_id)
+    question = user_challenge_answer.question
+
+    query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content}  ", reply_markup=InlineKeyboardMarkup(
+        [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-challenge-{user_challenge_id}-{user_challenge.user.user_id}")]]), parse_mode=ParseMode.HTML)
 
     return consts.COMMENTS
 
@@ -230,16 +298,18 @@ def answer(update: Update, context: CallbackContext):
     user_exam_answer_id = int(data[1])
     user_id = int(data[2])
     user_exam_id = int(data[3])
-    user_exam = UserExam.objects.prefetch_related('questions').get(id=user_exam_id)
+    user_exam = UserExam.objects.prefetch_related(
+        'questions').get(id=user_exam_id)
 
-    user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(id=user_exam_answer_id)
-    question_option = QuestionOption.objects.select_related('question').get(id=user_exam_answer.option_id)
+    user_exam_answer = UserExamAnswer.objects.select_related(
+        'user_exam').select_related('question').get(id=user_exam_answer_id)
+    question_option = QuestionOption.objects.select_related(
+        'question').get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
-    true_answer = QuestionOption.objects.select_related('question').filter(question = question).get(is_correct=True)
+    true_answer = QuestionOption.objects.select_related(
+        'question').filter(question=question).get(is_correct=True)
 
     query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content} \n\n <b>To'g'ri javob✅:</b> {true_answer.content} \n\n <b>Izoh💬: </b>{question.true_definition} ", reply_markup=InlineKeyboardMarkup(
-        [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode=ParseMode.HTML)
+        [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-exam-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode=ParseMode.HTML)
 
     return consts.COMMENTS
-
-

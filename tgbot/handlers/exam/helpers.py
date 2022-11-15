@@ -2,18 +2,22 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 
 
 from exam.models import UserExamAnswer
+from group_challenge.models import UserChallengeAnswer
 
 def send_test(update, context, question, user_exam, user,type = "exam"):
     
     text= f"<b>Mavzu</b>: {question.examm.all()[0].title}\n\n"
     number_of_test = context.user_data["number_of_test"]
 
-    if type == "exam":
-        
+    if type == "exam":        
         user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
         user_exam_answer.number = str(number_of_test)
         user_exam_answer.save()
-    
+    elif type =="challenge":
+        user_challenge_answer = UserChallengeAnswer.objects.get(user_challenge = user_exam, question=question, user = user)
+        user_challenge_answer.number = str(number_of_test)
+        user_challenge_answer.save()
+        
         
         
     text += f"<b>Savol:</b> {question.content}\n"

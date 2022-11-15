@@ -50,6 +50,11 @@ class Question(models.Model):
         "Savolar uchun mo'ljallangan vaqt(sekund)", default=10)
     true_definition = models.TextField(max_length=65536)
 
+    class Meta:
+        
+        verbose_name = 'Savol'
+        verbose_name_plural = 'Savollar'
+
     def add_question_options(self, content, is_correct=False):
         QuestionOption.objects.create(
             question=self, content=content, is_correct=is_correct)
@@ -85,8 +90,8 @@ class Exam(models.Model):
     def __str__(self) -> str:
         return self.title
     class Meta:
-        verbose_name = "Imtihon"
-        verbose_name_plural = "Imtihonlar"
+        verbose_name = "Test"
+        verbose_name_plural = "Testlar"
 
     def create_user_exam(self, user,again=None):
         counter = 0
@@ -97,19 +102,15 @@ class Exam(models.Model):
             
         finished_exams = UserExam.objects.prefetch_related("questions").select_related('user').select_related('exam').filter(
             user=user).filter(exam=self).filter(is_finished=True)
-        # print(f'questions === {self.questions.all()}')
         true_user_exam_answers = []
         if finished_exams.count() > 0:
-            # print("if ni ichiga kirvotti")
             for finished_exam in finished_exams:                
                 for user_exam_answer in UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
                     user_exam=finished_exam).filter(answered=True).filter(is_correct=True):
                         true_user_exam_answers.append(user_exam_answer.question)
 
             for question in self.questions.all():
-                if question in true_user_exam_answers:
-                    # print("true queston ekan")
-                    
+                if question in true_user_exam_answers:                    
                     continue
                 else:
                     if counter < 10:
@@ -132,6 +133,11 @@ class UserExam(models.Model):
     start_datetime = models.DateTimeField(auto_now_add=True)
     end_datetime = models.DateTimeField(null=True)
     is_finished = models.BooleanField(default=False)
+    
+    class Meta:
+        
+        verbose_name = 'Foydalanuvchi Testi'
+        verbose_name_plural = 'Foydalanuvchi Testlari'
 
     def update_score(self):
         score=UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(is_correct=True, user_exam=self).count()

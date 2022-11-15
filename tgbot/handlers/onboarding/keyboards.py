@@ -1,11 +1,11 @@
 from telegram import ReplyKeyboardMarkup
-from tgbot.handlers.onboarding.static_text import TEEST, CHALLENGE, LEADER, CONTACTUS
+from tgbot.handlers.onboarding.static_text import TEEST, CHALLENGE, LEADER, CONTACTUS, CHANGE_SETTINGS
 
 
 def make_keyboard_for_start_command() -> ReplyKeyboardMarkup:
     buttons = [
         [TEEST,CHALLENGE],
-        [LEADER, CONTACTUS]
+        [LEADER, CONTACTUS,CHANGE_SETTINGS ]
     ]
 
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True)

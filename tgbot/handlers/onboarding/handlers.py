@@ -8,6 +8,9 @@ from users.models import User
 from tgbot.handlers.onboarding.keyboards import make_keyboard_for_start_command, make_keyboard_for_regions
 from tgbot import consts
 
+from exam.models import UserExam
+from group_challenge.models import UserChallenge
+
 
 from utils.check_subscription import check_subscription
 
@@ -123,10 +126,15 @@ def checking_subscription(update: Update, context: CallbackContext):
 
 def home_page(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
-    user_id = data[2]
-    user, _ = User.get_user_and_created(update, context)
+    user_id = int(data[2])
     
-    update.callback_query.message.delete()
+    user = User.objects.get(user_id = user_id)
+    
+    if len(data)==4 and data[3] == "challenge":
+       pass
+    else:
+        update.callback_query.message.delete()
+   
     
     if user.name == "IsmiGul":
         text = "Siz botda IsmiGul bo'lib qolib ketibsiz , iltimos asl ismingizni kiriting yoki shundayligicha davom ettirish uchun quyidagilardan birini tanlang⬇️"
@@ -147,3 +155,46 @@ def back_to_home_page(update: Update, context: CallbackContext):
 def contactus(update: Update, context: CallbackContext):
     update.message.reply_text("Iltimos, bog'lanish uchun @alamiy_bot ga o'ting", reply_markup=ReplyKeyboardMarkup([[consts.BACK]], resize_keyboard=True))
     return consts.CONTACTING
+
+def bot_settings(update: Update, context: CallbackContext):
+    user, _ = User.get_user_and_created(update, context)
+    
+    update.message.reply_text(f"⚠️Sozlamalar bo'limiga xush kelibsiz!!!\n\n<b>Botdagi ismingiz</b> - <b>{user.name}</b>\n\n1️⃣Ismingizni o'zgartirish uchun <b>\"Ism o'zgartirish\"</b> tugmasini bosing\n2️⃣Botda siz duch kelgan nosozliklarni to'g'rilash uchun - <b>\"Sozlash🔧\"</b> tugmasini bosing", reply_markup=ReplyKeyboardMarkup([[consts.CHANGE_NAME, consts.CORRECTING]]), parse_mode = ParseMode.HTML)
+    return consts.SETTINGS
+
+def change_name(update: Update, context: CallbackContext):
+    update.message.reply_text("Iltimos ismingizni kiriting")
+    return consts.SETTINGS
+
+def set_name(update: Update, context: CallbackContext):
+    user, _ = User.get_user_and_created(update, context)
+    user.name = update.message.text
+    user.save()
+    
+    update.message.reply_text(f"Ismingiz {user.name} ga muvafaqqiyatli o'zgartirildi", reply_markup=make_keyboard_for_start_command())
+    return consts.SELECTING_ACTION
+
+def correct_settings(update: Update, context: CallbackContext):
+    user, _ = User.get_user_and_created(update, context)
+    user.is_busy = False
+    user.is_ended_challenge_waites = False
+    user.is_random_opponent_waites = False
+    user.save()
+    
+    user_exams = UserExam.objects.filter(user=user)
+    for user_exam in user_exams:
+        user_exam.is_finished = False
+        user_exam.save()
+        
+    user_challenges = UserChallenge.objects.filter(users=user)
+    for user_challenge in user_challenges:
+        user_challenge.is_active = False
+        user_challenge.is_random_opponent = False
+        user_challenge.is_waited_challenge = False
+        user_challenge.in_proccecc = False
+        user_challenge.save()
+        
+    update.message.reply_text("Bot xatoliklardan tozalandi. Botda foydalanishni davom ettirish uchun quyidagilardan birini tanlang🔽", reply_markup=make_keyboard_for_start_command())
+    
+    return consts.SELECTING_ACTION
+        

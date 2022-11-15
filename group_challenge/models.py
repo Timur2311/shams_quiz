@@ -29,8 +29,8 @@ class Challenge(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Challenge"
-        verbose_name_plural = "Challengelar"
+        verbose_name = "Bellashuv"
+        verbose_name_plural = "Bellashuvlar"
 
     def create_user_challenge(self, telegram_id, challenge):
         user = User.objects.get(user_id=telegram_id)
@@ -57,21 +57,27 @@ class UserChallenge(models.Model):
 
     user_score = models.IntegerField(default=0)
     opponent_score = models.IntegerField(default=0)
+    
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True) 
+    
+    user_timer = models.CharField(max_length=512, null=True, blank=True)
+    opponent_timer= models.CharField(max_length=512, null=True, blank=True)
 
     user_started_at = models.DateTimeField(null=True)
     user_finished_at = models.DateTimeField(null=True)
-    # user_duration = models.CharField(max_length = 256, null=True) 
     
     opponent_started_at = models.DateTimeField(null=True)
     opponent_finished_at = models.DateTimeField(null=True)
-    # opponent_duration = models.CharField(max_length = 256, null=True)
     
 
     is_user_finished = models.BooleanField(default=False)
     is_opponent_finished = models.BooleanField(default=False)
 
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    is_waited_challenge = models.BooleanField(default=False)
     
     in_proccecc = models.BooleanField(default=False)    
     
@@ -82,6 +88,10 @@ class UserChallenge(models.Model):
     opponent_message_id = models.CharField(max_length=1024, null = True)
     user_chat_id = models.CharField(max_length=1024, null = True)
     opponent_chat_id = models.CharField(max_length=1024, null = True)
+    
+    class Meta:
+        verbose_name = "Foydalanuvchi Bellashuvi"
+        verbose_name_plural = "Foydalanuvchi Bellashuvlari"
     
     def __str__(self) -> str:
         return str(self.is_active)
@@ -100,10 +110,8 @@ class UserChallenge(models.Model):
         difference = difference.total_seconds()
         difference = int(difference)
         
-  
         return difference
         
-
     def update_score(self, type):
         if type == 'user':
             score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
@@ -112,11 +120,6 @@ class UserChallenge(models.Model):
         elif type == "opponent":
             score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
             self.opponent_score = int(score)
-            
-            
-        # print(f"update score ni ichiga kirdi\nuser----{self.user_score}\nopponent---{self.opponent_score}")
-
-        # print(f"score-----{score}")
 
         return score
 
@@ -153,7 +156,12 @@ class UserChallengeAnswer(models.Model):
         UserChallenge, on_delete=models.CASCADE, related_name="answer")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    option_ids = models.CharField(max_length=255, null=True)
+    option_id = models.IntegerField(default=0)
+
+    
+    number = models.CharField(max_length = 16, null=True)
+    
+    
     answered = models.BooleanField(default=False)
     is_correct = models.BooleanField(default=False)
 

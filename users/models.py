@@ -15,12 +15,16 @@ from tgbot.handlers.utils.info import extract_user_data_from_update
 from utils.models import CreateUpdateTracker, nb, CreateTracker, GetOrNoneManager
 
 
+
+
 class AdminUserManager(Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_admin=True)
 
 
 class User(CreateUpdateTracker):
+    
+    
     user_id = models.PositiveBigIntegerField(primary_key=True)  # telegram_id
     username = models.CharField(max_length=32, **nb)
     first_name = models.CharField(max_length=256)
@@ -37,15 +41,22 @@ class User(CreateUpdateTracker):
     score = models.IntegerField(default=0)
     challenges_count = models.IntegerField(default=0)
     
+    
+    
+    
+    
     is_busy = models.BooleanField(default = False)
     is_random_opponent_waites = models.BooleanField(default = False)
+    is_ended_challenge_waites = models.BooleanField(default = False)
     challenge_id  =  models.CharField(max_length = 256, default = "no")
     
-    
-
-
+    class Meta:
+        verbose_name = "Foydalanuvchi"
+        verbose_name_plural = "Foydalanuvchilar"
+   
     def set_user_score(self):
         UserChallenge = apps.get_model(app_label='group_challenge', model_name='UserChallenge')
+
         
         user_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(user = self)
 

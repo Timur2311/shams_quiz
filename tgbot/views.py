@@ -20,7 +20,6 @@ def index(request):
 
 def add_question(request):
     if request.method == "POST":
-        # print(f"{request.FILES}")
         form = QuestionForm(request.POST, request.FILES)
         files = request.FILES.getlist('file')
         if form.is_valid():

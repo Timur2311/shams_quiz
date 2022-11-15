@@ -30,7 +30,6 @@ def saving_data():
             correct = questions_list[i+3]
             true_definition = questions_list[i+4]
 
-            # print(f"\n\ncontent--{content}\n incorrect1--{incorrect1}\n incorrect2--{incorrect2}\n correct--{correct} ")
 
             question = Question.objects.create(
                 content=content, stage=stage, tour=tour, true_definition=true_definition)

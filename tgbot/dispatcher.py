@@ -49,6 +49,8 @@ def setup_dispatcher(dp):
                        challenge_handlers.leader),
         MessageHandler(Filters.text(static_texts.CONTACTUS),
                        onboarding_handlers.contactus),
+        MessageHandler(Filters.text(consts.SET_SETTINGS) & ~Filters.command,
+                                           onboarding_handlers.bot_settings),
         CallbackQueryHandler(
             onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
         CallbackQueryHandler(
@@ -75,6 +77,10 @@ def setup_dispatcher(dp):
                 onboarding_handlers.home_page, pattern=r"home-page"),
             CallbackQueryHandler(
                 challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
+            CallbackQueryHandler(
+                exam_handler.answer, pattern=r"answer-"),
+            CallbackQueryHandler(
+                exam_handler.stage_exams, pattern=r"stage-exams-"),
 
         ],
 
@@ -156,14 +162,44 @@ def setup_dispatcher(dp):
                                            onboarding_handlers.region),
                             CommandHandler(
                 'start', onboarding_handlers.command_start), ],
-            consts.COMMENTS: [CallbackQueryHandler(
+            consts.COMMENTS: [
+                CallbackQueryHandler(
                 exam_handler.comments, pattern=r"comments-"),
                 CallbackQueryHandler(
                 exam_handler.answer, pattern=r"answer-"),
                 CallbackQueryHandler(
+                exam_handler.challenge_answer, pattern=r"incorrects-"),
+                CallbackQueryHandler(
                 exam_handler.stage_exams, pattern=r"stage-exams-"),
                 CommandHandler(
-                'start', onboarding_handlers.command_start), ]
+                'start', onboarding_handlers.command_start),
+                CallbackQueryHandler(
+                    challenge_handlers.revansh, pattern=r"revansh-"),
+                CommandHandler(
+                'start', onboarding_handlers.command_start),
+                CallbackQueryHandler(
+                    onboarding_handlers.home_page, pattern=r"home-page"),
+                
+            ],
+            consts.SETTINGS:[
+                MessageHandler(Filters.text(consts.SET_SETTINGS) & ~Filters.command,
+                                           onboarding_handlers.bot_settings),
+                MessageHandler(Filters.text(consts.CHANGE_NAME) & ~Filters.command,
+                                           onboarding_handlers.change_name),
+                MessageHandler(Filters.text(consts.CORRECTING) & ~Filters.command,
+                                           onboarding_handlers.correct_settings),
+                
+                
+                
+                
+                
+                
+                CommandHandler(
+                'start', onboarding_handlers.command_start),
+                
+                MessageHandler(Filters.text & ~Filters.command,
+                                         onboarding_handlers.set_name),
+            ]
         },
         fallbacks=[
             CommandHandler(
