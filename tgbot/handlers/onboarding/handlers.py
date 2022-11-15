@@ -159,7 +159,7 @@ def contactus(update: Update, context: CallbackContext):
 def bot_settings(update: Update, context: CallbackContext):
     user, _ = User.get_user_and_created(update, context)
     
-    update.message.reply_text(f"⚠️Sozlamalar bo'limiga xush kelibsiz!!!\n\n<b>Botdagi ismingiz</b> - <b>{user.name}</b>\n\n1️⃣Ismingizni o'zgartirish uchun <b>\"Ism o'zgartirish\"</b> tugmasini bosing\n2️⃣Botda siz duch kelgan nosozliklarni to'g'rilash uchun - <b>\"Sozlash🔧\"</b> tugmasini bosing", reply_markup=ReplyKeyboardMarkup([[consts.CHANGE_NAME, consts.CORRECTING]]), parse_mode = ParseMode.HTML)
+    update.message.reply_text(f"⚠️Sozlamalar bo'limiga xush kelibsiz!!!\n\n<b>Botdagi ismingiz</b> - <b>{user.name}</b>\n\n1️⃣Ismingizni o'zgartirish uchun <b>\"Ism o'zgartirish\"</b> tugmasini bosing\n2️⃣Botda siz duch kelgan nosozliklarni to'g'rilash uchun - <b>\"Sozlash🔧\"</b> tugmasini bosing", reply_markup=ReplyKeyboardMarkup([[consts.CHANGE_NAME, consts.CORRECTING]], resize_keyboard=True), parse_mode = ParseMode.HTML)
     return consts.SETTINGS
 
 def change_name(update: Update, context: CallbackContext):

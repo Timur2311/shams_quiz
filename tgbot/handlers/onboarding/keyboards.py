@@ -5,7 +5,8 @@ from tgbot.handlers.onboarding.static_text import TEEST, CHALLENGE, LEADER, CONT
 def make_keyboard_for_start_command() -> ReplyKeyboardMarkup:
     buttons = [
         [TEEST,CHALLENGE],
-        [LEADER, CONTACTUS,CHANGE_SETTINGS ]
+        [LEADER, CONTACTUS ],
+        [CHANGE_SETTINGS]
     ]
 
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True)
