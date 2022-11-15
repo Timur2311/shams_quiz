@@ -10,11 +10,12 @@ def send_test(update, context, question, user_exam, user,type = "exam"):
     number_of_test = context.user_data["number_of_test"]
 
     if type == "exam":        
-        user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
+        user_exam_answer = UserExamAnswer.objects.select_related(
+        'user_exam').select_related('question').get(user_exam = user_exam, question=question)
         user_exam_answer.number = str(number_of_test)
         user_exam_answer.save()
     elif type =="challenge":
-        user_challenge_answer = UserChallengeAnswer.objects.get(user_challenge = user_exam, question=question, user = user)
+        user_challenge_answer = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').get(user_challenge = user_exam, question=question, user = user)
         user_challenge_answer.number = str(number_of_test)
         user_challenge_answer.save()
         

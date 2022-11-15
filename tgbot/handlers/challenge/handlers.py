@@ -432,7 +432,8 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.get(
+                    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+        'users').select_related('user').select_related('opponent').select_related('challenge').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                         [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
@@ -530,7 +531,8 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.get(
+                    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+        'users').select_related('user').select_related('opponent').select_related('challenge').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                         [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)    
