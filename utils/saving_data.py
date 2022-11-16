@@ -38,11 +38,11 @@ def saving_data():
             question.add_question_options(content=incorrect1)
             question.add_question_options(content=incorrect2)
 
-            challenge_count = Challenge.objects.filter(stage=stage).count()
+            challenge_count = Challenge.objects.prefetch_related('questions').filter(stage=stage).count()
 
             if challenge_count == 0:
                 challenge = Challenge.objects.create(stage=stage)
                 challenge.questions.add(question)
             elif challenge_count > 0:
-                challenge = Challenge.objects.get(stage=stage)
+                challenge = Challenge.objects.prefetch_related('questions').get(stage=stage)
                 challenge.questions.add(question)

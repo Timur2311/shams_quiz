@@ -188,6 +188,8 @@ def setup_dispatcher(dp):
                                            onboarding_handlers.change_name),
                 MessageHandler(Filters.text(consts.CORRECTING) & ~Filters.command,
                                            onboarding_handlers.correct_settings),
+                MessageHandler(Filters.text(consts.BACK),
+                               onboarding_handlers.back_to_home_page),
                 
                 
                 

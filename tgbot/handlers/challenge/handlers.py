@@ -150,8 +150,8 @@ def challenge_callback(update: Update, context: CallbackContext):
 
     user_challenge_id = int(data[4])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
 
     user, _ = User.get_user_and_created(update, context)
 
@@ -218,8 +218,8 @@ def user_check(update: Update, context: CallbackContext):
     user_challenge_id = data[1]
     user_challenge_id = int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
     challenge_owner_id = data[2]
     challenge_owner_id = int(challenge_owner_id)
 
@@ -265,8 +265,8 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_id = int(data[5])
 
     user = User.objects.get(user_id=user_id)
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
 
     query.answer()
 
@@ -331,8 +331,8 @@ def challenge_handler(update: Update, context: CallbackContext):
         user_challenge__id=user_challenge_id).filter(question__id=question_id).filter(user=user)
     user_challenge_answer = user_challenge_answers[0]
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
 
     text = f"<b>Bellashuv turi:</b> {user_challenge.challenge.stage}-bosqich savollari. "
 
@@ -556,8 +556,8 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
     user_id = int(data[2])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
     message_id = user_challenge.created_challenge_message_id
     chat_id = user_challenge.created_challenge_chat_id
     user_challenge.delete()
@@ -617,8 +617,8 @@ def revansh(update: Update, context: CallbackContext):
 
     to_user_id = int(data[3])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
-        'user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+        'user','opponent','challenge').get(id=user_challenge_id)
 
     if user_challenge.user.user_id == to_user_id:
         context.bot.delete_message(
