@@ -597,7 +597,7 @@ def leader(update: Update, context: CallbackContext) -> None:
             
         else:
             text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
-            text+=f"G'alabalar soni: {leader_user.winners_challenge.all().count()}"
+            text+=f"G'alabalar soni: {leader_user.winners_challenge.all().count()}\n"
             
     for number, user in enumerate(users):
         if u.user_id == user.user_id and u not in leader_users:
