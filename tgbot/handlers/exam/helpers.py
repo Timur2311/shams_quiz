@@ -15,7 +15,8 @@ def send_test(update, context, question, user_exam, user,type = "exam"):
         user_exam_answer.number = str(number_of_test)
         user_exam_answer.save()
     elif type =="challenge":
-        user_challenge_answer = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').get(user_challenge = user_exam, question=question, user = user)
+        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').filter(user_challenge =user_exam, question=question,user=user)
+        user_challenge_answer = user_challenge_answers.first()
         user_challenge_answer.number = str(number_of_test)
         user_challenge_answer.save()
         
