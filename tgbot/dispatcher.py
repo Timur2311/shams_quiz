@@ -61,6 +61,8 @@ def setup_dispatcher(dp):
             challenge_handlers.challenge_confirmation, pattern=r"confirmation-"),
         CommandHandler(
             'start', onboarding_handlers.command_start),
+        CommandHandler(
+                'warning_message', onboarding_handlers.send_message),
 
 
 
