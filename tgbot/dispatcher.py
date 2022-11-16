@@ -139,6 +139,8 @@ def setup_dispatcher(dp):
                     challenge_handlers.revansh, pattern=r"revansh-"),
                 CallbackQueryHandler(
                 exam_handler.comments, pattern=r"comments-"),
+                CallbackQueryHandler(
+                onboarding_handlers.hide, pattern=r"hide-"),
 
                 CallbackQueryHandler(
                     onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),

@@ -200,3 +200,5 @@ def correct_settings(update: Update, context: CallbackContext):
     
     return consts.SELECTING_ACTION
         
+def hide(update: Update, context: CallbackContext):
+    update.callback_query.message.delete()
