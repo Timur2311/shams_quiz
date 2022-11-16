@@ -71,6 +71,8 @@ def setup_dispatcher(dp):
         entry_points=[
             CommandHandler(
                 'start', onboarding_handlers.command_start),
+            CommandHandler(
+                'warning_message', onboarding_handlers.send_message),
             CallbackQueryHandler(
                 challenge_handlers.revansh, pattern=r"revansh-"),
             CallbackQueryHandler(
