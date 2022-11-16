@@ -137,6 +137,8 @@ def setup_dispatcher(dp):
                                onboarding_handlers.back_to_home_page),
                 CallbackQueryHandler(
                     challenge_handlers.revansh, pattern=r"revansh-"),
+                CallbackQueryHandler(
+                exam_handler.comments, pattern=r"comments-"),
 
                 CallbackQueryHandler(
                     onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
