@@ -1,8 +1,8 @@
 from .models import User
-from telegram.ext import CallbackContext
-from telegram import bot
+from telegram import Bot
 
 
+bot = Bot("5562717565:AAEs4q5ejjv2H3ma4byDZTG1DD-YvrkoVPg")
 def warning_users():
     users = User.objects.all()
     for user in users:
