@@ -55,7 +55,7 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
     if query == "":
         return
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').get(id=int(query))
 
     text = f"Do'stingiz sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilmoqda. Bellashuvga rozilik bildirganingizdan so'ng botga o'tib, bot orqali bellashuvni boshlashingiz mumkin "
@@ -85,13 +85,13 @@ def random_opponent(update: Update, context: CallbackContext):
 
     user_challenge_id = int(data[1])
     from_user_id = int(data[2])
-    created_user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+    created_user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
-    user_random_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related(
+    user_random_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related('user').select_related(
         'opponent').select_related('challenge').filter(user__user_id=from_user_id, challenge__stage=created_user_challenge.challenge.stage, is_active=True, opponent=None).exclude(id=created_user_challenge.id)
 
-    possible_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(
+    possible_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(
         is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)).exclude(in_proccecc=True)
 
     if possible_challenges.count() == 0:
@@ -218,7 +218,7 @@ def user_check(update: Update, context: CallbackContext):
     user_challenge_id = data[1]
     user_challenge_id = int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users',"answer").select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
     challenge_owner_id = data[2]
     challenge_owner_id = int(challenge_owner_id)
@@ -265,7 +265,7 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_id = int(data[5])
 
     user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=user_id)
-    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users',"answer").select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
 
     query.answer()
@@ -331,7 +331,7 @@ def challenge_handler(update: Update, context: CallbackContext):
         user_challenge__id=user_challenge_id).filter(question__id=question_id).filter(user=user)
     user_challenge_answer = user_challenge_answers[0]
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users',"answer").select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
 
     text = f"<b>Bellashuv turi:</b> {user_challenge.challenge.stage}-bosqich savollari. "
@@ -409,7 +409,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 user.is_busy = False
                 user.save()
                 if user.is_ended_challenge_waites:
-                    ended_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+                    ended_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related(
                         'user').select_related('opponent').select_related('challenge').filter(users=user, is_active=False).filter(is_waited_challenge=True)
                     for ended_challenge in ended_challenges:
                         opponent = ended_challenge.user
@@ -432,7 +432,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+                    user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
@@ -508,7 +508,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 user.save()
 
                 if user.is_ended_challenge_waites:
-                    ended_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
+                    ended_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related(
                         'user').select_related('opponent').select_related('challenge').filter(users=user, is_active=False).filter(is_waited_challenge=True)
                     for ended_challenge in ended_challenges:
                         opponent = ended_challenge.user
@@ -531,7 +531,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+                    user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
@@ -556,7 +556,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
     user_id = int(data[2])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users',"answer").select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
     message_id = user_challenge.created_challenge_message_id
     chat_id = user_challenge.created_challenge_chat_id
@@ -622,7 +622,7 @@ def revansh(update: Update, context: CallbackContext):
 
     to_user_id = int(data[3])
 
-    user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions','users',"answer").select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
 
     if user_challenge.user.user_id == to_user_id:

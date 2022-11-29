@@ -187,7 +187,7 @@ def correct_settings(update: Update, context: CallbackContext):
         user_exam.is_finished = False
         user_exam.save()
         
-    user_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related(
+    user_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').filter(users=user)
     for user_challenge in user_challenges:
         user_challenge.is_active = False
