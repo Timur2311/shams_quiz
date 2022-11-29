@@ -58,7 +58,7 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
         else:
             stage = update.message.text[0]
 
-        exams = Exam.objects.prefetch_related('questions'"exam_user_exams").filter(stage=stage)
+        exams = Exam.objects.prefetch_related('questions',"exam_user_exams").filter(stage=stage)
         buttons = []
         for exam in exams:
             buttons.append([InlineKeyboardButton(
