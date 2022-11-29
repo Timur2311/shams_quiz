@@ -1,7 +1,7 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 
 
-from exam.models import UserExamAnswer, Exam
+from exam.models import UserExamAnswer, Exam, QuestionOption
 from group_challenge.models import UserChallengeAnswer
 
 def send_test(update, context, question, user_exam, user,type = "exam"):
@@ -26,9 +26,10 @@ def send_test(update, context, question, user_exam, user,type = "exam"):
     variants = ["A", "B", "C"]
     buttons = []
     
-    
+    question_options = QuestionOption.objects.select_related(
+        'question').filter(question=question).order_by("?")
 
-    for index, question_option in enumerate(question.options.order_by("?")):
+    for index, question_option in enumerate(question_options):
             text += f"\n<b>{variants[index]}</b>) {question_option.content}"
             buttons.append([InlineKeyboardButton(f"{variants[index]}", callback_data=f"question-variant-{question.id}-{question_option.id}-{user_exam.id}-{user.user_id}")])
             
