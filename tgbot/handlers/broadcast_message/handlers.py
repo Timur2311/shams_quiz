@@ -59,7 +59,7 @@ def broadcast_decision_handler(update: Update, context: CallbackContext) -> None
 
     if broadcast_decision == CONFIRM_BROADCAST:
         admin_text = message_is_sent
-        user_ids = list(User.objects.all().values_list('user_id', flat=True))
+        user_ids = list(User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').all().values_list('user_id', flat=True))
 
         if DEBUG:
             broadcast_message(

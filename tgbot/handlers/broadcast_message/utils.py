@@ -65,9 +65,9 @@ def send_one_message(
         )
     except telegram.error.Unauthorized:
         print(f"Can't send message to {user_id}. Reason: Bot was stopped.")
-        User.objects.filter(user_id=user_id).update(is_blocked_bot=True)
+        User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(user_id=user_id).update(is_blocked_bot=True)
         success = False
     else:
         success = True
-        User.objects.filter(user_id=user_id).update(is_blocked_bot=False)
+        User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(user_id=user_id).update(is_blocked_bot=False)
     return success
