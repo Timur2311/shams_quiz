@@ -60,8 +60,8 @@ class Question(models.Model):
             question=self, content=content, is_correct=is_correct)
 
     def create_exam(self, exam_title):
-        if Exam.objects.prefetch_related("questions").filter(title=exam_title).exists():
-            exam = Exam.objects.prefetch_related("questions").get(title=exam_title)
+        if Exam.objects.prefetch_related("questions","exam_user_exams").filter(title=exam_title).exists():
+            exam = Exam.objects.prefetch_related("questions","exam_user_exams").get(title=exam_title)
             exam.questions.add(self)
         else:
             exam = Exam.objects.create(
@@ -97,10 +97,10 @@ class Exam(models.Model):
         counter = 0
         userexam = UserExam.objects.create(exam=self, user=user)
         if again:
-            UserExam.objects.prefetch_related("questions").select_related('user').select_related('exam').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
+            UserExam.objects.prefetch_related("questions","answer").select_related('user').select_related('exam').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
         
             
-        finished_exams = UserExam.objects.prefetch_related("questions").select_related('user').select_related('exam').filter(
+        finished_exams = UserExam.objects.prefetch_related("questions","answer").select_related('user').select_related('exam').filter(
             user=user).filter(exam=self).filter(is_finished=True)
         true_user_exam_answers = []
         if finished_exams.count() > 0:
@@ -126,9 +126,9 @@ class Exam(models.Model):
 
 
 class UserExam(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_user_exams")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = "user_exams")
-    questions = models.ManyToManyField(Question)  # editable=False
+    questions = models.ManyToManyField(Question, related_name="user_exam_questions")  # editable=False
     score = models.IntegerField(default=0)
     start_datetime = models.DateTimeField(auto_now_add=True)
     end_datetime = models.DateTimeField(null=True)

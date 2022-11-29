@@ -24,7 +24,7 @@ USER_TASK_STATUS = (
 
 class Challenge(models.Model):
     stage = models.CharField(max_length=16, null=True, blank=True)
-    questions = models.ManyToManyField(Question)
+    questions = models.ManyToManyField(Question, related_name="challenge_questions")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -53,7 +53,7 @@ class UserChallenge(models.Model):
     
     is_random_opponent =  models.BooleanField(default=False)
     
-    questions = models.ManyToManyField(Question)
+    questions = models.ManyToManyField(Question, related_name="user_challenge_questions")
 
     user_score = models.IntegerField(default=0)
     opponent_score = models.IntegerField(default=0)
@@ -155,7 +155,7 @@ class UserChallengeAnswer(models.Model):
     user_challenge = models.ForeignKey(
         UserChallenge, on_delete=models.CASCADE, related_name="answer")
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="challenge_answers")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_challenge_answer_question")
     option_id = models.IntegerField(default=0)
 
     

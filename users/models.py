@@ -53,11 +53,11 @@ class User(CreateUpdateTracker):
     def set_user_score(self):
         UserChallenge = apps.get_model(app_label='group_challenge', model_name='UserChallenge')
         
-        user_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(user = self)
+        user_challenges = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(user = self)
 
-        opponent_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(opponent = self)
+        opponent_challenges = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(opponent = self)
 
-        challenges_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = self).count()
+        challenges_count = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = self).count()
 
         self.challenges_count =  challenges_count
         self.save()   
