@@ -191,7 +191,7 @@ def exam_handler(update: Update, context: CallbackContext):
         user.save()
         
         if user.is_ended_challenge_waites:
-            ended_challenges = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related('users').select_related(
+            ended_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
                 'user').select_related('opponent').select_related('challenge').filter(users=user, is_active=False).filter(is_waited_challenge=True)
             for ended_challenge in ended_challenges:
                 opponent = ended_challenge.user
@@ -214,7 +214,7 @@ def exam_handler(update: Update, context: CallbackContext):
                 user.save()
             return consts.COMMENTS
         if user.is_random_opponent_waites:
-            user_challenge = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related('users').select_related(
+            user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related(
                 'user').select_related('opponent').select_related('challenge').get(
                 id=int(user.challenge_id))
             context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
@@ -278,7 +278,7 @@ def challenge_answer(update: Update, context: CallbackContext):
     user_challenge_answer_id = int(data[1])
     user_id = int(data[2])
     user_challenge_id = int(data[3])
-    user_challenge = UserChallenge.objects.prefetch_related('questions',"challenge_answers").prefetch_related(
+    user_challenge = UserChallenge.objects.prefetch_related('questions').prefetch_related(
         'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
 
     user_challenge_answer = UserChallengeAnswer.objects.select_related(
