@@ -96,7 +96,7 @@ class User(CreateUpdateTracker):
         u, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
 
         if created:
-            # Save deep_link to User model
+            # Save deep_link to User model  
             if context is not None and context.args is not None and len(context.args) > 0:
                 payload = context.args[0]
                 if str(payload).strip() != str(data["user_id"]).strip():  # you can't invite yourself
@@ -120,7 +120,7 @@ class User(CreateUpdateTracker):
 
     @property
     def invited_users(self) -> QuerySet[User]:
-        return User.objects.filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
+        return User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
 
     @property
     def tg_str(self) -> str:

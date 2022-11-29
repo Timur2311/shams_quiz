@@ -25,7 +25,7 @@ def challenges_list(update: Update, context: CallbackContext) -> None:
 
 
 def stage_exams(update: Update, context: CallbackContext):
-    u = User.objects.get(user_id=update.message.from_user.id)
+    u = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=update.message.from_user.id)
 
     chat_member = context.bot.get_chat_member(
         consts.CHANNEL_USERNAME, update.message.from_user.id)
@@ -92,7 +92,7 @@ def random_opponent(update: Update, context: CallbackContext):
         'opponent').select_related('challenge').filter(user__user_id=from_user_id, challenge__stage=created_user_challenge.challenge.stage, is_active=True, opponent=None).exclude(id=created_user_challenge.id)
 
     possible_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(
-        is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.get(user_id=from_user_id)).exclude(in_proccecc=True)
+        is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)).exclude(in_proccecc=True)
 
     if possible_challenges.count() == 0:
 
@@ -110,8 +110,8 @@ def random_opponent(update: Update, context: CallbackContext):
 
     elif possible_challenges.count() >= 1:
         possible_challenge = possible_challenges.first()
-        user = User.objects.get(user_id=possible_challenge.user.user_id)
-        opponent = User.objects.get(user_id=from_user_id)
+        user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=possible_challenge.user.user_id)
+        opponent = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)
         created_user_challenge.delete()
         possible_challenge = possible_challenges.first()
         possible_challenge.opponent = opponent
@@ -264,7 +264,7 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_type = data[4]
     user_id = int(data[5])
 
-    user = User.objects.get(user_id=user_id)
+    user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=user_id)
     user_challenge = UserChallenge.objects.prefetch_related('questions','users').select_related(
         'user','opponent','challenge').get(id=user_challenge_id)
 
@@ -322,7 +322,7 @@ def challenge_handler(update: Update, context: CallbackContext):
 
     from_user_id = int(data[5])
 
-    user = User.objects.get(user_id=from_user_id)
+    user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)
 
     question_option = QuestionOption.objects.select_related(
         'question').get(id=question_option_id)
@@ -579,7 +579,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
 def leader(update: Update, context: CallbackContext) -> None:
     u, _ = User.get_user_and_created(update, context)
 
-    users = User.objects.all().order_by('-score')
+    users = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').all().order_by('-score')
     text = "Top foydalanuvchilar:\n"
     simple_user_text = ""
     for user in users:
@@ -632,7 +632,7 @@ def revansh(update: Update, context: CallbackContext):
         context.bot.delete_message(
             chat_id=user_challenge.opponent_chat_id, message_id=user_challenge.opponent_message_id)
 
-    opponent = User.objects.get(user_id=to_user_id)
+    opponent = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=to_user_id)
     challenge = Challenge.objects.prefetch_related(
         'questions').get(id=user_challenge.challenge.id)
 

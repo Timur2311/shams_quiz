@@ -33,7 +33,7 @@ class Challenge(models.Model):
         verbose_name_plural = "Bellashuvlar"
 
     def create_user_challenge(self, telegram_id, challenge):
-        user = User.objects.get(user_id=telegram_id)
+        user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=telegram_id)
         user_challenge = UserChallenge.objects.create(
             user=user, challenge=challenge)
         user_challenge.users.add(user)
@@ -154,7 +154,7 @@ class UserChallenge(models.Model):
 class UserChallengeAnswer(models.Model):
     user_challenge = models.ForeignKey(
         UserChallenge, on_delete=models.CASCADE, related_name="answer")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="challenge_answers")
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     option_id = models.IntegerField(default=0)
 
@@ -169,7 +169,7 @@ class UserChallengeAnswer(models.Model):
 class Rate(models.Model):
     stars_count = models.IntegerField(default=0)
     old_stars_count = models.IntegerField(default=0)    
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="rates")
     user_challenge = models.ForeignKey(UserChallenge, on_delete=models.CASCADE, null=True, blank = True)
     
     

@@ -1,8 +1,9 @@
 from .models import User
 from telegram import Bot
+from dtb.settings import TELEGRAM_TOKEN
 
 
-bot = Bot("5562717565:AAEs4q5ejjv2H3ma4byDZTG1DD-YvrkoVPg")
+bot = Bot(TELEGRAM_TOKEN)
 def warning_users():
     users = User.objects.all()
     for user in users:

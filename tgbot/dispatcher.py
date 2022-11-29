@@ -85,6 +85,8 @@ def setup_dispatcher(dp):
                 exam_handler.answer, pattern=r"answer-"),
             CallbackQueryHandler(
                 exam_handler.stage_exams, pattern=r"stage-exams-"),
+            CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
 
         ],
 
@@ -156,18 +158,26 @@ def setup_dispatcher(dp):
             ],
             consts.LEADERBOARD: [MessageHandler(Filters.text(consts.BACK),
                                                 onboarding_handlers.back_to_home_page),
+                                 CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
                                  CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.CONTACTING: [MessageHandler(Filters.text(consts.BACK),
                                                onboarding_handlers.back_to_home_page),
+                                CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
                                 CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.NAME: [MessageHandler(Filters.text & ~Filters.command,
                                          onboarding_handlers.registration),
+                          CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
                           CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.REGION: [MessageHandler(Filters.text & ~Filters.command,
                                            onboarding_handlers.region),
+                            CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
                             CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.COMMENTS: [
@@ -197,6 +207,8 @@ def setup_dispatcher(dp):
                 MessageHandler(Filters.text(consts.CORRECTING) & ~Filters.command,
                                            onboarding_handlers.correct_settings),
                 MessageHandler(Filters.text(consts.BACK),
+                               CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
                                onboarding_handlers.back_to_home_page),
                 
                 
