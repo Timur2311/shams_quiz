@@ -1,12 +1,12 @@
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 
 
-from exam.models import UserExamAnswer
+from exam.models import UserExamAnswer, Exam
 from group_challenge.models import UserChallengeAnswer
 
 def send_test(update, context, question, user_exam, user,type = "exam"):
-    
-    text= f"<b>Mavzu</b>: {question.examm.all()[0].title}\n\n"
+    question_theme = Exam.objects.prefetch_related('questions',"exam_user_exams").filter(questions = question)
+    text= f"<b>Mavzu</b>: {question_theme[0].title}\n\n"
     number_of_test = context.user_data["number_of_test"]
 
     if type == "exam":        
