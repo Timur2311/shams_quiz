@@ -39,11 +39,7 @@ class User(CreateUpdateTracker):
     region = models.CharField(max_length = 32, null=True)
     
     score = models.IntegerField(default=0)
-    challenges_count = models.IntegerField(default=0)
-    
-    
-    
-    
+    challenges_count = models.IntegerField(default=0)    
     
     is_busy = models.BooleanField(default = False)
     is_random_opponent_waites = models.BooleanField(default = False)
@@ -56,7 +52,6 @@ class User(CreateUpdateTracker):
    
     def set_user_score(self):
         UserChallenge = apps.get_model(app_label='group_challenge', model_name='UserChallenge')
-
         
         user_challenges = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(user = self)
 
@@ -65,13 +60,9 @@ class User(CreateUpdateTracker):
         challenges_count = UserChallenge.objects.prefetch_related('questions').prefetch_related('users').select_related('user').select_related('opponent').select_related('challenge').filter(users = self).count()
 
         self.challenges_count =  challenges_count
-        self.save()
-        
-        
+        self.save()   
         
         score = 0
-        
-        
         
         for user_exam in user_challenges:
             score+=user_exam.user_score
@@ -93,7 +84,7 @@ class User(CreateUpdateTracker):
     def get_user_and_created(cls, update: Update, context: CallbackContext) -> Tuple[User, bool]:
         """ python-telegram-bot's Update, Context --> User instance """
         data = extract_user_data_from_update(update)
-        u, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
+        u, created = cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').update_or_create(user_id=data["user_id"], defaults=data)
 
         if created:
             # Save deep_link to User model  
@@ -115,8 +106,8 @@ class User(CreateUpdateTracker):
         """ Search user in DB, return User or None if not found """
         username = str(username_or_user_id).replace("@", "").strip().lower()
         if username.isdigit():  # user_id
-            return cls.objects.filter(user_id=int(username)).first()
-        return cls.objects.filter(username__iexact=username).first()
+            return cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(user_id=int(username)).first()
+        return cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(username__iexact=username).first()
 
     @property
     def invited_users(self) -> QuerySet[User]:
