@@ -44,21 +44,21 @@ class Challenge(models.Model):
 
 class UserChallenge(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="as_owner")
+        User, on_delete=models.CASCADE, related_name="as_owner", db_index=True)
     opponent = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="as_opponent", null=True, blank=True)
+        User, on_delete=models.CASCADE, related_name="as_opponent", null=True, blank=True, db_index=True)
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
-    users = models.ManyToManyField(User, related_name="user_challenges")
-    is_active = models.BooleanField(default=True)
+    users = models.ManyToManyField(User, related_name="user_challenges", db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True, db_index=True)
     
-    is_random_opponent =  models.BooleanField(default=False)
+    is_random_opponent =  models.BooleanField(default=False, db_index=True)
     
     questions = models.ManyToManyField(Question, related_name="user_challenge_questions")
 
     user_score = models.IntegerField(default=0)
     opponent_score = models.IntegerField(default=0)
     
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True) 
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True, db_index=True) 
     
     user_timer = models.CharField(max_length=512, null=True, blank=True)
     opponent_timer= models.CharField(max_length=512, null=True, blank=True)
@@ -77,7 +77,7 @@ class UserChallenge(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    is_waited_challenge = models.BooleanField(default=False)
+    is_waited_challenge = models.BooleanField(default=False, db_index=True)
     
     in_proccecc = models.BooleanField(default=False)    
     
@@ -153,17 +153,17 @@ class UserChallenge(models.Model):
 
 class UserChallengeAnswer(models.Model):
     user_challenge = models.ForeignKey(
-        UserChallenge, on_delete=models.CASCADE, related_name="answer")
-    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="challenge_answers")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_challenge_answer_question")
+        UserChallenge, on_delete=models.CASCADE, related_name="answer", db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="challenge_answers", db_index=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_challenge_answer_question", db_index=True)
     option_id = models.IntegerField(default=0)
 
     
     number = models.CharField(max_length = 16, null=True)
     
     
-    answered = models.BooleanField(default=False)
-    is_correct = models.BooleanField(default=False)
+    answered = models.BooleanField(default=False, db_index=True)
+    is_correct = models.BooleanField(default=False,db_index=True)
 
     
 class Rate(models.Model):

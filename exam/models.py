@@ -77,11 +77,11 @@ class QuestionOption(models.Model):
 
 
 class Exam(models.Model):
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=256, db_index=True)
     content = models.TextField(max_length=2048, null=True, blank=True)
-    stage = models.CharField(max_length=16, default=0)
+    stage = models.CharField(max_length=16, default=0, db_index=True)
     tour = models.CharField(max_length=16, default=0)
-    questions = models.ManyToManyField(Question, related_name = "examm")
+    questions = models.ManyToManyField(Question, related_name = "examm", db_index=True)
     questions_count = models.IntegerField(
         "Savollar soni", default=10)
 
@@ -126,13 +126,13 @@ class Exam(models.Model):
 
 
 class UserExam(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_user_exams")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = "user_exams")
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_user_exams", db_index = True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = "user_exams", db_index=True)
     questions = models.ManyToManyField(Question, related_name="user_exam_questions")  # editable=False
     score = models.IntegerField(default=0)
     start_datetime = models.DateTimeField(auto_now_add=True)
     end_datetime = models.DateTimeField(null=True)
-    is_finished = models.BooleanField(default=False)
+    is_finished = models.BooleanField(default=False, db_index=True)
     
     class Meta:
         
@@ -168,7 +168,7 @@ class UserExamAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name = "user_exam_anwer")
     option_id = models.IntegerField(default=0)
     number = models.CharField(max_length = 16, null=True)
-    answered = models.BooleanField(default=False)
-    is_correct = models.BooleanField(default=False)
+    answered = models.BooleanField(default=False, db_index=True)
+    is_correct = models.BooleanField(default=False, db_index=True)
     
     
