@@ -49,7 +49,7 @@ class UserChallenge(models.Model):
         User, on_delete=models.CASCADE, related_name="as_opponent", null=True, blank=True, db_index=True)
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     users = models.ManyToManyField(User, related_name="user_challenges", db_index=True)
-    is_active = models.BooleanField(default=True, db_index=True, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
     
     is_random_opponent =  models.BooleanField(default=False, db_index=True)
     
