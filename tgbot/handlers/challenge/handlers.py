@@ -25,7 +25,7 @@ def challenges_list(update: Update, context: CallbackContext) -> None:
 
 
 def stage_exams(update: Update, context: CallbackContext):
-    u = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=update.message.from_user.id)
+    u = User.objects.get(user_id=update.message.from_user.id)
 
     chat_member = context.bot.get_chat_member(
         consts.CHANNEL_USERNAME, update.message.from_user.id)
@@ -106,8 +106,8 @@ def random_opponent(update: Update, context: CallbackContext):
 
     elif possible_challenges.count() >= 1:
         possible_challenge = possible_challenges.first()
-        user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=possible_challenge.user.user_id)
-        opponent = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=from_user_id)
+        user = User.objects.get(user_id=possible_challenge.user.user_id)
+        opponent = User.objects.get(user_id=from_user_id)
         created_user_challenge.delete()
         possible_challenge = possible_challenges.first()
         possible_challenge.opponent = opponent
@@ -258,7 +258,7 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_type = data[4]
     user_id = int(data[5])
 
-    user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=user_id)
+    user = User.objects.get(user_id=user_id)
     user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
     query.answer()
@@ -315,7 +315,7 @@ def challenge_handler(update: Update, context: CallbackContext):
 
     from_user_id = int(data[5])
 
-    user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=from_user_id)
+    user = User.objects.get(user_id=from_user_id)
 
     question_option = QuestionOption.objects.select_related(
         'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=question_option_id)
@@ -618,7 +618,7 @@ def revansh(update: Update, context: CallbackContext):
         context.bot.delete_message(
             chat_id=user_challenge.opponent_chat_id, message_id=user_challenge.opponent_message_id)
 
-    opponent = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=to_user_id)
+    opponent = User.objects.get(user_id=to_user_id)
     challenge = Challenge.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','questions').get(id=user_challenge.challenge.id)
 
     context.bot.answer_callback_query(

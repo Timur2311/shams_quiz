@@ -107,7 +107,7 @@ class User(CreateUpdateTracker):
 
     @property
     def invited_users(self) -> QuerySet[User]:
-        return User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
+        return User.objects.filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
 
     @property
     def tg_str(self) -> str:

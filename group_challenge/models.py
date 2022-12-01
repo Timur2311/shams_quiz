@@ -33,7 +33,7 @@ class Challenge(models.Model):
         verbose_name_plural = "Bellashuvlar"
 
     def create_user_challenge(self, telegram_id, challenge):
-        user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=telegram_id)
+        user = User.objects.get(user_id=telegram_id)
         user_challenge = UserChallenge.objects.create(
             user=user, challenge=challenge)
         user_challenge.users.add(user)
