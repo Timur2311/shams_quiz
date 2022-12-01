@@ -580,16 +580,16 @@ def leader(update: Update, context: CallbackContext) -> None:
 
         if u.user_id == leader_user.user_id:
             text += f"\n{index+1})✅<b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
-            text+=f"G'alabalar soni: {leader_user.winners_challenge.all().count()}\n"
+            text+=f"G'alabalar soni: {leader_user.winner_user_challenges.all().count()}\n"
             
         else:
             text += f"\n{index+1}) <b>{leader_user.name}</b>: \nUmumiy to'plangan ball🧮 - {leader_user.score}\nUmumiy bellashuvlar soni⚔️: {leader_user.challenges_count}\n"
-            text+=f"G'alabalar soni: {leader_user.winners_challenge.all().count()}\n"
+            text+=f"G'alabalar soni: {leader_user.winner_user_challenges.all().count()}\n"
             
     for number, user in enumerate(users):
         if u.user_id == user.user_id and u not in leader_users:
             simple_user_text = f"\n\n{number})✅ <b>{user.name}</b>: \nUmumiy to'plangan ball🧮 - {u.score}\nUmumiy bellashuvlar soni⚔️: {u.challenges_count}\n"
-            simple_user_text+=f"G'alabalar soni: {leader_user.winners_challenge.all().count()}\n"
+            simple_user_text+=f"G'alabalar soni: {leader_user.winner_user_challenges.all().count()}\n"
             
 
     text += simple_user_text
