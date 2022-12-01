@@ -80,7 +80,7 @@ class User(CreateUpdateTracker):
     def get_user_and_created(cls, update: Update, context: CallbackContext) -> Tuple[User, bool]:
         """ python-telegram-bot's Update, Context --> User instance """
         data = extract_user_data_from_update(update)
-        u, created = cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').update_or_create(user_id=data["user_id"], defaults=data)
+        u, created = cls.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').update_or_create(user_id=data["user_id"], defaults=data)
 
         if created:
             # Save deep_link to User model  
@@ -102,8 +102,8 @@ class User(CreateUpdateTracker):
         """ Search user in DB, return User or None if not found """
         username = str(username_or_user_id).replace("@", "").strip().lower()
         if username.isdigit():  # user_id
-            return cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(user_id=int(username)).first()
-        return cls.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(username__iexact=username).first()
+            return cls.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').filter(user_id=int(username)).first()
+        return cls.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').filter(username__iexact=username).first()
 
     @property
     def invited_users(self) -> QuerySet[User]:
