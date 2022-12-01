@@ -566,7 +566,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
 def leader(update: Update, context: CallbackContext) -> None:
     u, _ = User.get_user_and_created(update, context)
 
-    users = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').all().order_by('-score')
+    users = User.objects.all().order_by('-score')
     text = "Top foydalanuvchilar:\n"
     simple_user_text = ""
     for user in users:
