@@ -95,7 +95,7 @@ def region(update: Update, context: CallbackContext):
     if chat_member['status'] == "left":
         check_subscription(update,context, u)
     else:
-        user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=update.message.from_user.id)
+        user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=update.message.from_user.id)
         user.region = update.message.text
         user.save()
 
@@ -128,7 +128,7 @@ def home_page(update: Update, context: CallbackContext):
     data = update.callback_query.data.split("-")
     user_id = int(data[2])
     
-    user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id = user_id)
+    user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id = user_id)
     
     if len(data)==4 and data[3] == "challenge":
        pass
@@ -181,12 +181,12 @@ def correct_settings(update: Update, context: CallbackContext):
     user.is_random_opponent_waites = False
     user.save()
     
-    user_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(user=user)
+    user_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user=user)
     for user_exam in user_exams:
         user_exam.is_finished = False
         user_exam.save()
         
-    user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user)
+    user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users=user)
     for user_challenge in user_challenges:
         user_challenge.is_active = False
         user_challenge.is_random_opponent = False
@@ -204,7 +204,7 @@ def hide(update: Update, context: CallbackContext):
 def send_message(update: Update, context: CallbackContext):
     user, _ = User.get_user_and_created(update, context)
     if user.user_id == "1755197237":
-        users = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').all()
+        users = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').all()
         for user in users:
             message = context.bot.send_message(chat_id=user.user_id, text="Assalamu alaykum! Botda o'zgarishlar qilindi. Bot to'g'ri ishlashi uchun iltimos quyidagi ketma-ketlikka rioya qiling:\n\n1️⃣Botga /start buyrug'ini yozish orqali botni qaytadan ishga tushiring!\n\n2️⃣Botdagi \"Sozlamalar⚙️\" tugmachasini bosing, chiqqan tugmachalar ichidan esa \"Sozlash🔧\" tugmasini bosing!\n\n3️⃣Yuqoridagi amallarni qilganingizdan so'ng botdan foydalanishni davom ettirishingiz mumkin.\n\n⚠️Bot sozlanganidan keyin ham vujudga kelgan har qanday muammoni, ayni vujudga kelish vaqtida skrinshot qilib @ulugbek2311 ga murojaat qilishingizni iltimos qilib qolar edik. Botni soz ishlashi uchun bu juda muhim! E'tiboringiz uchun rahmat. Kuningiz xayrli va barokatli o'tsin.")
         update.message.reply_text("success")

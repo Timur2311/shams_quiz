@@ -60,8 +60,8 @@ class   Question(models.Model):
             question=self, content=content, is_correct=is_correct)
 
     def create_exam(self, exam_title):
-        if Exam.objects.prefetch_related("questions").filter(title=exam_title).exists():
-            exam = Exam.objects.prefetch_related("questions").get(title=exam_title)
+        if Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').filter(title=exam_title).exists():
+            exam = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').get(title=exam_title)
             exam.questions.add(self)
         else:
             exam = Exam.objects.create(
@@ -81,7 +81,7 @@ class Exam(models.Model):
     content = models.TextField(max_length=2048, null=True, blank=True)
     stage = models.CharField(max_length=16, default=0, db_index=True)
     tour = models.CharField(max_length=16, default=0)
-    questions = models.ManyToManyField(Question, related_name = "examm", db_index=True)
+    questions = models.ManyToManyField(Question, related_name = "question_exams", db_index=True)
     questions_count = models.IntegerField(
         "Savollar soni", default=10)
 
@@ -97,15 +97,15 @@ class Exam(models.Model):
         counter = 0
         userexam = UserExam.objects.create(exam=self, user=user)
         if again:
-            UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
+            UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
         
             
-        finished_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(
+        finished_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(
             user=user).filter(exam=self).filter(is_finished=True)
         true_user_exam_answers = []
         if finished_exams.count() > 0:
             for finished_exam in finished_exams:                
-                for user_exam_answer in UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(
+                for user_exam_answer in UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(
                     user_exam=finished_exam).filter(answered=True).filter(is_correct=True):
                         true_user_exam_answers.append(user_exam_answer.question)
 
@@ -128,7 +128,7 @@ class Exam(models.Model):
 class UserExam(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_user_exams", db_index = True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = "user_exams", db_index=True)
-    questions = models.ManyToManyField(Question, related_name="user_exam_questions")  # editable=False
+    questions = models.ManyToManyField(Question, related_name="question_user_exams")  # editable=False
     score = models.IntegerField(default=0)
     start_datetime = models.DateTimeField(auto_now_add=True)
     end_datetime = models.DateTimeField(null=True)
@@ -140,7 +140,7 @@ class UserExam(models.Model):
         verbose_name_plural = 'Foydalanuvchi Testlari'
 
     def update_score(self):
-        score=UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(is_correct=True, user_exam=self).count()
+        score=UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(is_correct=True, user_exam=self).count()
         
         self.score = int(score)
        
@@ -164,8 +164,8 @@ class UserExam(models.Model):
 
 class UserExamAnswer(models.Model):
     user_exam = models.ForeignKey(
-        UserExam, on_delete=models.CASCADE, related_name="answer")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name = "user_exam_anwer")
+        UserExam, on_delete=models.CASCADE, related_name="user_exam_answer")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name = "question_user_exam_answer")
     option_id = models.IntegerField(default=0)
     number = models.CharField(max_length = 16, null=True)
     answered = models.BooleanField(default=False, db_index=True)

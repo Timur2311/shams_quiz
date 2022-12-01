@@ -25,7 +25,7 @@ def challenges_list(update: Update, context: CallbackContext) -> None:
 
 
 def stage_exams(update: Update, context: CallbackContext):
-    u = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=update.message.from_user.id)
+    u = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=update.message.from_user.id)
 
     chat_member = context.bot.get_chat_member(
         consts.CHANNEL_USERNAME, update.message.from_user.id)
@@ -33,8 +33,7 @@ def stage_exams(update: Update, context: CallbackContext):
         check_subscription(update, context, u)
     else:
         stage = update.message.text[0]
-        challenge = Challenge.objects.prefetch_related(
-            'questions').get(stage=stage)
+        challenge = Challenge.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','questions').get(stage=stage)
 
         user_challenge = challenge.create_user_challenge(u.user_id, challenge)
 
@@ -55,7 +54,7 @@ def inlinequery(update: Update, context: CallbackContext) -> None:
     if query == "":
         return
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=int(query))
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=int(query))
 
     text = f"Do'stingiz sizni {user_challenge.challenge.stage}-bosqich savollari bo'yicha bellashuvga taklif qilmoqda. Bellashuvga rozilik bildirganingizdan so'ng botga o'tib, bot orqali bellashuvni boshlashingiz mumkin "
     my_user_challenge = user_challenge
@@ -84,11 +83,11 @@ def random_opponent(update: Update, context: CallbackContext):
 
     user_challenge_id = int(data[1])
     from_user_id = int(data[2])
-    created_user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    created_user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
-    user_random_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(user__user_id=from_user_id, challenge__stage=created_user_challenge.challenge.stage, is_active=True, opponent=None).exclude(id=created_user_challenge.id)
+    user_random_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(user__user_id=from_user_id, challenge__stage=created_user_challenge.challenge.stage, is_active=True, opponent=None).exclude(id=created_user_challenge.id)
 
-    possible_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(
+    possible_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(
         is_active=True).filter(is_random_opponent=True).filter(opponent=None).exclude(user=User.objects.get(user_id=from_user_id)).exclude(in_proccecc=True)
 
     if possible_challenges.count() == 0:
@@ -107,8 +106,8 @@ def random_opponent(update: Update, context: CallbackContext):
 
     elif possible_challenges.count() >= 1:
         possible_challenge = possible_challenges.first()
-        user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=possible_challenge.user.user_id)
-        opponent = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)
+        user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=possible_challenge.user.user_id)
+        opponent = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=from_user_id)
         created_user_challenge.delete()
         possible_challenge = possible_challenges.first()
         possible_challenge.opponent = opponent
@@ -147,7 +146,7 @@ def challenge_callback(update: Update, context: CallbackContext):
 
     user_challenge_id = int(data[4])
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
     user, _ = User.get_user_and_created(update, context)
 
@@ -214,7 +213,7 @@ def user_check(update: Update, context: CallbackContext):
     user_challenge_id = data[1]
     user_challenge_id = int(user_challenge_id)
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
     challenge_owner_id = data[2]
     challenge_owner_id = int(challenge_owner_id)
 
@@ -259,8 +258,8 @@ def challenge_confirmation(update: Update, context: CallbackContext) -> None:
     user_type = data[4]
     user_id = int(data[5])
 
-    user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=user_id)
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=user_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
     query.answer()
 
@@ -316,16 +315,16 @@ def challenge_handler(update: Update, context: CallbackContext):
 
     from_user_id = int(data[5])
 
-    user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=from_user_id)
+    user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=from_user_id)
 
     question_option = QuestionOption.objects.select_related(
-        'question').get(id=question_option_id)
+        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=question_option_id)
 
-    user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(
+    user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(
         user_challenge__id=user_challenge_id).filter(question__id=question_id).filter(user=user)
     user_challenge_answer = user_challenge_answers[0]
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
     text = f"<b>Bellashuv turi:</b> {user_challenge.challenge.stage}-bosqich savollari. "
 
@@ -402,7 +401,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 user.is_busy = False
                 user.save()
                 if user.is_ended_challenge_waites:
-                    ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user, is_active=False).filter(is_waited_challenge=True)
+                    ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users=user, is_active=False).filter(is_waited_challenge=True)
                     for ended_challenge in ended_challenges:
                         opponent = ended_challenge.user
                         if ended_challenge.user.user_id == user.user_id:
@@ -424,7 +423,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(
+                    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                         [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
@@ -499,7 +498,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                 user.save()
 
                 if user.is_ended_challenge_waites:
-                    ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user, is_active=False).filter(is_waited_challenge=True)
+                    ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users=user, is_active=False).filter(is_waited_challenge=True)
                     for ended_challenge in ended_challenges:
                         opponent = ended_challenge.user
                         if ended_challenge.user.user_id == user.user_id:
@@ -521,7 +520,7 @@ def challenge_handler(update: Update, context: CallbackContext):
                         user.save()
                     return consts.COMMENTS
                 if user.is_random_opponent_waites:
-                    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(
+                    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(
                         id=int(user.challenge_id))
                     context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                         [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)    
@@ -545,7 +544,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
 
     user_id = int(data[2])
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
     message_id = user_challenge.created_challenge_message_id
     chat_id = user_challenge.created_challenge_chat_id
     user_challenge.delete()
@@ -567,7 +566,7 @@ def revoke_challenge(update: Update, context: CallbackContext):
 def leader(update: Update, context: CallbackContext) -> None:
     u, _ = User.get_user_and_created(update, context)
 
-    users = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').all().order_by('-score')
+    users = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').all().order_by('-score')
     text = "Top foydalanuvchilar:\n"
     simple_user_text = ""
     for user in users:
@@ -610,7 +609,7 @@ def revansh(update: Update, context: CallbackContext):
 
     to_user_id = int(data[3])
 
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
     if user_challenge.user.user_id == to_user_id:
         context.bot.delete_message(
@@ -619,9 +618,8 @@ def revansh(update: Update, context: CallbackContext):
         context.bot.delete_message(
             chat_id=user_challenge.opponent_chat_id, message_id=user_challenge.opponent_message_id)
 
-    opponent = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=to_user_id)
-    challenge = Challenge.objects.prefetch_related(
-        'questions').get(id=user_challenge.challenge.id)
+    opponent = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=to_user_id)
+    challenge = Challenge.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','questions').get(id=user_challenge.challenge.id)
 
     context.bot.answer_callback_query(
         callback_query_id=query.id, text="Qayta bellashuv haqidagi so'rovingiz raqibingizga jo'natildi", show_alert=True)

@@ -22,7 +22,7 @@ def exam_start(update: Update, context: CallbackContext) -> None:
     TODO:
     - Pagination
     """
-    exams = Exam.objects.prefetch_related('questions').all()
+    exams = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').all()
     inline_keyboard = keyboards.exam_keyboard(exams)
 
     if update.callback_query:
@@ -58,7 +58,7 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
         else:
             stage = update.message.text[0]
 
-        exams = Exam.objects.prefetch_related('questions').filter(stage=stage)
+        exams = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').filter(stage=stage)
         buttons = []
         for exam in exams:
             buttons.append([InlineKeyboardButton(
@@ -94,7 +94,7 @@ def exam_callback(update: Update, context: CallbackContext) -> None:
     user_id = int(data[2])
 
     query.answer()
-    exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
+    exam = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').get(id=exam_id)
     text = f"<b>{exam.title}</b> \n\n<b>Testni boshlaymizmi?</b>"
     context.bot.edit_message_text(
         text=text,
@@ -121,7 +121,7 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
             again = data[4]
         else:
             again = None
-        exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
+        exam = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').get(id=exam_id)
         user_exam, counter = exam.create_user_exam(user, again)
 
         context.user_data["number_of_test"] = 1
@@ -162,10 +162,10 @@ def exam_handler(update: Update, context: CallbackContext):
 
     user, _ = User.get_user_and_created(update, context)
     question_option = QuestionOption.objects.select_related(
-        'question').get(id=question_option_id)
-    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').get(
+        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=question_option_id)
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(
         user_exam__id=user_exam_id, question__id=question_id)
-    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
+    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').get(id=user_exam_id)
 
     user_exam_answer.is_correct = question_option.is_correct
     user_exam_answer.option_id = question_option.id
@@ -190,7 +190,7 @@ def exam_handler(update: Update, context: CallbackContext):
         user.save()
         
         if user.is_ended_challenge_waites:
-            ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user, is_active=False).filter(is_waited_challenge=True)
+            ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users=user, is_active=False).filter(is_waited_challenge=True)
             for ended_challenge in ended_challenges:
                 opponent = ended_challenge.user
                 if ended_challenge.user.user_id == user.user_id:
@@ -212,7 +212,7 @@ def exam_handler(update: Update, context: CallbackContext):
                 user.save()
             return consts.COMMENTS
         if user.is_random_opponent_waites:
-            user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(
+            user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(
                 id=int(user.challenge_id))
             context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
@@ -228,9 +228,9 @@ def comments(update: Update, context: CallbackContext):
 
         user_id = int(data[3])
 
-        user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
+        user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').get(id=user_exam_id)
 
-        user_exam_answers = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(
+        user_exam_answers = UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(
             user_exam__id=user_exam_id).filter(is_correct=False)
 
         buttons = []
@@ -250,7 +250,7 @@ def comments(update: Update, context: CallbackContext):
 
         user_id = int(data[3])
 
-        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(
+        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(
             user_challenge__id=user_challenge_id).filter(user_challenge__id=user_challenge_id, user__user_id=user_id, is_correct=False)
 
         buttons = []
@@ -274,11 +274,11 @@ def challenge_answer(update: Update, context: CallbackContext):
     user_challenge_answer_id = int(data[1])
     user_id = int(data[2])
     user_challenge_id = int(data[3])
-    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').get(id=user_challenge_id)
 
-    user_challenge_answer = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').get(id=user_challenge_answer_id)
+    user_challenge_answer = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').get(id=user_challenge_answer_id)
     question_option = QuestionOption.objects.select_related(
-        'question').get(id=user_challenge_answer.option_id)
+        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=user_challenge_answer.option_id)
     question = user_challenge_answer.question
 
     query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content}  ", reply_markup=InlineKeyboardMarkup(
@@ -293,14 +293,14 @@ def answer(update: Update, context: CallbackContext):
     user_exam_answer_id = int(data[1])
     user_id = int(data[2])
     user_exam_id = int(data[3])
-    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
+    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').get(id=user_exam_id)
 
-    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').get(id=user_exam_answer_id)
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=user_exam_answer_id)
     question_option = QuestionOption.objects.select_related(
-        'question').get(id=user_exam_answer.option_id)
+        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
     true_answer = QuestionOption.objects.select_related(
-        'question').filter(question=question).get(is_correct=True)
+        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(question=question).get(is_correct=True)
 
     query.edit_message_text(f"<b>Savol:</b> {question.content} \n\n<b>Siz bergan javob❌:</b> {question_option.content} \n\n <b>To'g'ri javob✅:</b> {true_answer.content} \n\n <b>Izoh💬: </b>{question.true_definition} ", reply_markup=InlineKeyboardMarkup(
         [[InlineKeyboardButton(consts.BACK, callback_data=f"comments-exam-{user_exam_id}-{user_exam.user.user_id}")], [InlineKeyboardButton("Testlarga qaytish📚", callback_data=f"stage-exams-{user_id}-{user_exam.exam.stage}")]]), parse_mode=ParseMode.HTML)

@@ -24,7 +24,7 @@ USER_TASK_STATUS = (
 
 class Challenge(models.Model):
     stage = models.CharField(max_length=16, null=True, blank=True)
-    questions = models.ManyToManyField(Question, related_name="challenge_questions")
+    questions = models.ManyToManyField(Question, related_name="question_challenges")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -33,7 +33,7 @@ class Challenge(models.Model):
         verbose_name_plural = "Bellashuvlar"
 
     def create_user_challenge(self, telegram_id, challenge):
-        user = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').get(user_id=telegram_id)
+        user = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').get(user_id=telegram_id)
         user_challenge = UserChallenge.objects.create(
             user=user, challenge=challenge)
         user_challenge.users.add(user)
@@ -44,17 +44,17 @@ class Challenge(models.Model):
 
 class UserChallenge(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="as_owner", db_index=True)
+        User, on_delete=models.CASCADE, related_name="owner_user_challenges", db_index=True)
     opponent = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="as_opponent", null=True, blank=True, db_index=True)
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True, db_index=True) 
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
-    users = models.ManyToManyField(User, related_name="user_challenges", db_index=True)
+        User, on_delete=models.CASCADE, related_name="opponent_user_challenges", null=True, blank=True, db_index=True)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winner_user_challenges", null=True, blank=True, db_index=True) 
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name="challenge_user_challenges")
+    users = models.ManyToManyField(User, related_name="user_user_challenges", db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
     
     is_random_opponent =  models.BooleanField(default=False, db_index=True)
     
-    questions = models.ManyToManyField(Question, related_name="user_challenge_questions")
+    questions = models.ManyToManyField(Question, related_name="question_user_challenges")
 
     user_score = models.IntegerField(default=0)
     opponent_score = models.IntegerField(default=0)
@@ -113,11 +113,11 @@ class UserChallenge(models.Model):
         
     def update_score(self, type):
         if type == 'user':
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
             self.user_score = int(score)
             
         elif type == "opponent":
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
             self.opponent_score = int(score)
 
         return score
@@ -152,9 +152,9 @@ class UserChallenge(models.Model):
 
 class UserChallengeAnswer(models.Model):
     user_challenge = models.ForeignKey(
-        UserChallenge, on_delete=models.CASCADE, related_name="answer", db_index=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="challenge_answers", db_index=True)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_challenge_answer_question", db_index=True)
+        UserChallenge, on_delete=models.CASCADE, related_name="answers", db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="user_challenge_answers", db_index=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="question_user_challenge_answers", db_index=True)
     option_id = models.IntegerField(default=0)
 
     

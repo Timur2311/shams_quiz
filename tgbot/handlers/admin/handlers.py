@@ -27,8 +27,8 @@ def stats(update: Update, context: CallbackContext) -> None:
         return
 
     text = static_text.users_amount_stat.format(
-        user_count=User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').count(),  # count may be ineffective if there are a lot of users.
-        active_24=User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(updated_at__gte=now() - timedelta(hours=24)).count()
+        user_count=User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').count(),  # count may be ineffective if there are a lot of users.
+        active_24=User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').filter(updated_at__gte=now() - timedelta(hours=24)).count()
     )
 
     update.message.reply_text(
@@ -46,6 +46,6 @@ def export_users(update: Update, context: CallbackContext) -> None:
         return
 
     # in values argument you can specify which fields should be returned in output csv
-    users = User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').all().values()
+    users = User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').all().values()
     csv_users = _get_csv_from_qs_values(users)
     context.bot.send_document(chat_id=u.user_id, document=csv_users)

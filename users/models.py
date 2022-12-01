@@ -49,11 +49,11 @@ class User(CreateUpdateTracker):
     def set_user_score(self):
         UserChallenge = apps.get_model(app_label='group_challenge', model_name='UserChallenge')
         
-        user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(user = self)
+        user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(user = self)
 
-        opponent_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(opponent = self)
+        opponent_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(opponent = self)
 
-        challenges_count = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users = self).count()
+        challenges_count = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users = self).count()
 
         self.challenges_count =  challenges_count
         self.save()   
@@ -107,7 +107,7 @@ class User(CreateUpdateTracker):
 
     @property
     def invited_users(self) -> QuerySet[User]:
-        return User.objects.prefetch_related('user_exams','as_owner','as_opponent','user_challenges','winners_challenge','challenge_answers','rates').filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
+        return User.objects.prefetch_related('winner_user_challenges','user_challenge_answers','owner_user_challenges','opponent_user_challenges','user_user_challenges').filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
 
     @property
     def tg_str(self) -> str:
