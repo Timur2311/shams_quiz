@@ -47,6 +47,7 @@ class UserChallenge(models.Model):
         User, on_delete=models.CASCADE, related_name="as_owner", db_index=True)
     opponent = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="as_opponent", null=True, blank=True, db_index=True)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True, db_index=True) 
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     users = models.ManyToManyField(User, related_name="user_challenges", db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
@@ -57,8 +58,6 @@ class UserChallenge(models.Model):
 
     user_score = models.IntegerField(default=0)
     opponent_score = models.IntegerField(default=0)
-    
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winners_challenge", null=True, blank=True, db_index=True) 
     
     user_timer = models.CharField(max_length=512, null=True, blank=True)
     opponent_timer= models.CharField(max_length=512, null=True, blank=True)
@@ -114,11 +113,11 @@ class UserChallenge(models.Model):
         
     def update_score(self, type):
         if type == 'user':
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
             self.user_score = int(score)
             
         elif type == "opponent":
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
             self.opponent_score = int(score)
 
         return score

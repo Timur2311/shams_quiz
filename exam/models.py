@@ -42,7 +42,7 @@ EXAM_STAGE_CHOICES = (
 )
 
 
-class Question(models.Model):
+class   Question(models.Model):
     content = models.TextField(max_length=2048)
     stage = models.CharField(choices=EXAM_STAGE_CHOICES, max_length=16)
     tour = models.CharField(choices=EXAM_TOUR_CHOISES, max_length=16)
@@ -60,8 +60,8 @@ class Question(models.Model):
             question=self, content=content, is_correct=is_correct)
 
     def create_exam(self, exam_title):
-        if Exam.objects.prefetch_related("questions","exam_user_exams").filter(title=exam_title).exists():
-            exam = Exam.objects.prefetch_related("questions","exam_user_exams").get(title=exam_title)
+        if Exam.objects.prefetch_related("questions").filter(title=exam_title).exists():
+            exam = Exam.objects.prefetch_related("questions").get(title=exam_title)
             exam.questions.add(self)
         else:
             exam = Exam.objects.create(
@@ -97,15 +97,15 @@ class Exam(models.Model):
         counter = 0
         userexam = UserExam.objects.create(exam=self, user=user)
         if again:
-            UserExam.objects.prefetch_related("questions","answer").select_related('user').select_related('exam').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
+            UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
         
             
-        finished_exams = UserExam.objects.prefetch_related("questions","answer").select_related('user').select_related('exam').filter(
+        finished_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(
             user=user).filter(exam=self).filter(is_finished=True)
         true_user_exam_answers = []
         if finished_exams.count() > 0:
             for finished_exam in finished_exams:                
-                for user_exam_answer in UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
+                for user_exam_answer in UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(
                     user_exam=finished_exam).filter(answered=True).filter(is_correct=True):
                         true_user_exam_answers.append(user_exam_answer.question)
 
@@ -140,7 +140,7 @@ class UserExam(models.Model):
         verbose_name_plural = 'Foydalanuvchi Testlari'
 
     def update_score(self):
-        score=UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(is_correct=True, user_exam=self).count()
+        score=UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(is_correct=True, user_exam=self).count()
         
         self.score = int(score)
        

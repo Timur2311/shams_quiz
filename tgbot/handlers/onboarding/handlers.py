@@ -181,14 +181,12 @@ def correct_settings(update: Update, context: CallbackContext):
     user.is_random_opponent_waites = False
     user.save()
     
-    user_exams = UserExam.objects.prefetch_related(
-        'questions',"answer").filter(user=user)
+    user_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').filter(user=user)
     for user_exam in user_exams:
         user_exam.is_finished = False
         user_exam.save()
         
-    user_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
-        'users').select_related('user').select_related('opponent').select_related('challenge').filter(users=user)
+    user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user)
     for user_challenge in user_challenges:
         user_challenge.is_active = False
         user_challenge.is_random_opponent = False

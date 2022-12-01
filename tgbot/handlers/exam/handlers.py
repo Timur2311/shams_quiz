@@ -22,7 +22,7 @@ def exam_start(update: Update, context: CallbackContext) -> None:
     TODO:
     - Pagination
     """
-    exams = Exam.objects.prefetch_related('questions',"exam_user_exams").all()
+    exams = Exam.objects.prefetch_related('questions').all()
     inline_keyboard = keyboards.exam_keyboard(exams)
 
     if update.callback_query:
@@ -58,7 +58,7 @@ def stage_exams(update: Update, context: CallbackContext) -> None:
         else:
             stage = update.message.text[0]
 
-        exams = Exam.objects.prefetch_related('questions',"exam_user_exams").filter(stage=stage)
+        exams = Exam.objects.prefetch_related('questions').filter(stage=stage)
         buttons = []
         for exam in exams:
             buttons.append([InlineKeyboardButton(
@@ -94,7 +94,7 @@ def exam_callback(update: Update, context: CallbackContext) -> None:
     user_id = int(data[2])
 
     query.answer()
-    exam = Exam.objects.prefetch_related('questions',"exam_user_exams").get(id=exam_id)
+    exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
     text = f"<b>{exam.title}</b> \n\n<b>Testni boshlaymizmi?</b>"
     context.bot.edit_message_text(
         text=text,
@@ -121,7 +121,7 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
             again = data[4]
         else:
             again = None
-        exam = Exam.objects.prefetch_related('questions',"exam_user_exams").get(id=exam_id)
+        exam = Exam.objects.prefetch_related('questions').get(id=exam_id)
         user_exam, counter = exam.create_user_exam(user, again)
 
         context.user_data["number_of_test"] = 1
@@ -163,10 +163,9 @@ def exam_handler(update: Update, context: CallbackContext):
     user, _ = User.get_user_and_created(update, context)
     question_option = QuestionOption.objects.select_related(
         'question').get(id=question_option_id)
-    user_exam_answer = UserExamAnswer.objects.select_related('user_exam').select_related('question').get(
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').get(
         user_exam__id=user_exam_id, question__id=question_id)
-    user_exam = UserExam.objects.prefetch_related(
-        'questions',"answer").get(id=user_exam_id)
+    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
 
     user_exam_answer.is_correct = question_option.is_correct
     user_exam_answer.option_id = question_option.id
@@ -191,8 +190,7 @@ def exam_handler(update: Update, context: CallbackContext):
         user.save()
         
         if user.is_ended_challenge_waites:
-            ended_challenges = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related(
-                'user').select_related('opponent').select_related('challenge').filter(users=user, is_active=False).filter(is_waited_challenge=True)
+            ended_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').filter(users=user, is_active=False).filter(is_waited_challenge=True)
             for ended_challenge in ended_challenges:
                 opponent = ended_challenge.user
                 if ended_challenge.user.user_id == user.user_id:
@@ -214,8 +212,7 @@ def exam_handler(update: Update, context: CallbackContext):
                 user.save()
             return consts.COMMENTS
         if user.is_random_opponent_waites:
-            user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related('users').select_related(
-                'user').select_related('opponent').select_related('challenge').get(
+            user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(
                 id=int(user.challenge_id))
             context.bot.send_message(user.user_id, f"Sizga {user_challenge.challenge.stage}-bosqich savollari bo'yicha tasodifiy raqib topildi. Bellashish uchun \"Boshlash\" tugmasini bosing. ", reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Boshlash", callback_data=f"confirmation-random-{user_challenge.id}-start-user-{user.user_id}")]]), parse_mode=ParseMode.HTML)
@@ -231,10 +228,9 @@ def comments(update: Update, context: CallbackContext):
 
         user_id = int(data[3])
 
-        user_exam = UserExam.objects.prefetch_related(
-            'questions',"answer").get(id=user_exam_id)
+        user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
 
-        user_exam_answers = UserExamAnswer.objects.select_related('user_exam').select_related('question').filter(
+        user_exam_answers = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').filter(
             user_exam__id=user_exam_id).filter(is_correct=False)
 
         buttons = []
@@ -254,7 +250,7 @@ def comments(update: Update, context: CallbackContext):
 
         user_id = int(data[3])
 
-        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge', 'user', 'question').filter(
+        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').filter(
             user_challenge__id=user_challenge_id).filter(user_challenge__id=user_challenge_id, user__user_id=user_id, is_correct=False)
 
         buttons = []
@@ -278,11 +274,9 @@ def challenge_answer(update: Update, context: CallbackContext):
     user_challenge_answer_id = int(data[1])
     user_id = int(data[2])
     user_challenge_id = int(data[3])
-    user_challenge = UserChallenge.objects.prefetch_related('questions',"answer").prefetch_related(
-        'users').select_related('user').select_related('opponent').select_related('challenge').get(id=user_challenge_id)
+    user_challenge = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('users','questions','challenge__questions').get(id=user_challenge_id)
 
-    user_challenge_answer = UserChallengeAnswer.objects.select_related(
-        'user_challenge', 'user', 'question').get(id=user_challenge_answer_id)
+    user_challenge_answer = UserChallengeAnswer.objects.select_related('user_challenge','user','question','user_challenge__user','user_challenge__opponent','user_challenge__challenge','user_challenge__winner').prefetch_related('user_challenge__users','user_challenge__questions','user_challenge__challenge__questions').get(id=user_challenge_answer_id)
     question_option = QuestionOption.objects.select_related(
         'question').get(id=user_challenge_answer.option_id)
     question = user_challenge_answer.question
@@ -299,11 +293,9 @@ def answer(update: Update, context: CallbackContext):
     user_exam_answer_id = int(data[1])
     user_id = int(data[2])
     user_exam_id = int(data[3])
-    user_exam = UserExam.objects.prefetch_related(
-        'questions',"answer").get(id=user_exam_id)
+    user_exam = UserExam.objects.select_related('exam','user').prefetch_related('questions','exam__questions').get(id=user_exam_id)
 
-    user_exam_answer = UserExamAnswer.objects.select_related(
-        'user_exam').select_related('question').get(id=user_exam_answer_id)
+    user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question','user_exam__exam','user_exam__user').prefetch_related('user_exam__questions','user_exam__exam__questions').get(id=user_exam_answer_id)
     question_option = QuestionOption.objects.select_related(
         'question').get(id=user_exam_answer.option_id)
     question = user_exam_answer.question
