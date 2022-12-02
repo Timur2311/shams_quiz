@@ -569,8 +569,8 @@ def leader(update: Update, context: CallbackContext) -> None:
     users = User.objects.all().order_by('-score')
     text = "Top foydalanuvchilar:\n"
     simple_user_text = ""
-    for user in users:
-        user.set_user_score()
+    # for user in users:
+    #     user.set_user_score()
 
     leader_users = []
     for leader in users[:10]:
