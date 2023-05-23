@@ -38,11 +38,11 @@ def saving_data():
             question.add_question_options(content=incorrect1)
             question.add_question_options(content=incorrect2)
 
-            challenge_count = Challenge.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','questions').filter(stage=stage).count()
+            challenge_count = Challenge.objects.filter(stage=stage).count()
 
             if challenge_count == 0:
                 challenge = Challenge.objects.create(stage=stage)
                 challenge.questions.add(question)
             elif challenge_count > 0:
-                challenge = Challenge.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','questions').get(stage=stage)
+                challenge = Challenge.objects.get(stage=stage)
                 challenge.questions.add(question)

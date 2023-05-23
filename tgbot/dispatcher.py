@@ -50,7 +50,7 @@ def setup_dispatcher(dp):
         MessageHandler(Filters.text(static_texts.CONTACTUS),
                        onboarding_handlers.contactus),
         MessageHandler(Filters.text(consts.SET_SETTINGS) & ~Filters.command,
-                                           onboarding_handlers.bot_settings),
+                       onboarding_handlers.bot_settings),
         CallbackQueryHandler(
             onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
         CallbackQueryHandler(
@@ -62,7 +62,7 @@ def setup_dispatcher(dp):
         CommandHandler(
             'start', onboarding_handlers.command_start),
         CommandHandler(
-                'warning_message', onboarding_handlers.send_message),
+            'warning_message', onboarding_handlers.send_message),
 
 
 
@@ -86,7 +86,7 @@ def setup_dispatcher(dp):
             CallbackQueryHandler(
                 exam_handler.stage_exams, pattern=r"stage-exams-"),
             CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
+                exam_handler.comments, pattern=r"comments-"),
 
         ],
 
@@ -144,9 +144,9 @@ def setup_dispatcher(dp):
                 CallbackQueryHandler(
                     challenge_handlers.revansh, pattern=r"revansh-"),
                 CallbackQueryHandler(
-                exam_handler.comments, pattern=r"comments-"),
+                    exam_handler.comments, pattern=r"comments-"),
                 CallbackQueryHandler(
-                onboarding_handlers.hide, pattern=r"hide-"),
+                    onboarding_handlers.hide, pattern=r"hide-"),
 
                 CallbackQueryHandler(
                     onboarding_handlers.checking_subscription, pattern=r"checking-subscription-"),
@@ -156,71 +156,61 @@ def setup_dispatcher(dp):
                     'start', onboarding_handlers.command_start),
 
             ],
-            consts.LEADERBOARD: [MessageHandler(Filters.text(consts.BACK),
-                                                onboarding_handlers.back_to_home_page),
-                                 CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
-                                 CommandHandler(
-                'start', onboarding_handlers.command_start), ],
-            consts.CONTACTING: [MessageHandler(Filters.text(consts.BACK),
-                                               onboarding_handlers.back_to_home_page),
-                                CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
-                                CommandHandler(
-                'start', onboarding_handlers.command_start), ],
+            
+            
             consts.NAME: [MessageHandler(Filters.text & ~Filters.command,
                                          onboarding_handlers.registration),
                           CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
-                          CommandHandler(
+                exam_handler.comments, pattern=r"comments-"),
+                CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.REGION: [MessageHandler(Filters.text & ~Filters.command,
                                            onboarding_handlers.region),
                             CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
-                            CommandHandler(
+                exam_handler.comments, pattern=r"comments-"),
+                CommandHandler(
                 'start', onboarding_handlers.command_start), ],
             consts.COMMENTS: [
                 CallbackQueryHandler(
-                exam_handler.comments, pattern=r"comments-"),
+                    exam_handler.comments, pattern=r"comments-"),
                 CallbackQueryHandler(
-                exam_handler.answer, pattern=r"answer-"),
+                    exam_handler.answer, pattern=r"answer-"),
                 CallbackQueryHandler(
-                exam_handler.challenge_answer, pattern=r"incorrects-"),
+                    exam_handler.challenge_answer, pattern=r"incorrects-"),
                 CallbackQueryHandler(
-                exam_handler.stage_exams, pattern=r"stage-exams-"),
+                    exam_handler.stage_exams, pattern=r"stage-exams-"),
                 CommandHandler(
-                'start', onboarding_handlers.command_start),
+                    'start', onboarding_handlers.command_start),
                 CallbackQueryHandler(
                     challenge_handlers.revansh, pattern=r"revansh-"),
                 CommandHandler(
-                'start', onboarding_handlers.command_start),
+                    'start', onboarding_handlers.command_start),
                 CallbackQueryHandler(
                     onboarding_handlers.home_page, pattern=r"home-page"),
-                
+
             ],
-            consts.SETTINGS:[
+            consts.SETTINGS: [
                 MessageHandler(Filters.text(consts.SET_SETTINGS) & ~Filters.command,
-                                           onboarding_handlers.bot_settings),
+                               onboarding_handlers.bot_settings),
                 MessageHandler(Filters.text(consts.CHANGE_NAME) & ~Filters.command,
-                                           onboarding_handlers.change_name),
+                               onboarding_handlers.change_name),
                 MessageHandler(Filters.text(consts.CORRECTING) & ~Filters.command,
-                                           onboarding_handlers.correct_settings),
-                MessageHandler(Filters.text(consts.BACK),
-                               CallbackQueryHandler(
-                    exam_handler.comments, pattern=r"comments-"),
+                               onboarding_handlers.correct_settings),
+                MessageHandler(Filters.text(consts.BACK,),
                                onboarding_handlers.back_to_home_page),
-                
-                
-                
-                
-                
-                
+                CallbackQueryHandler(
+                    exam_handler.comments, pattern=r"comments-"),
+
+
+
+
+
+
                 CommandHandler(
-                'start', onboarding_handlers.command_start),
-                
+                    'start', onboarding_handlers.command_start),
+
                 MessageHandler(Filters.text & ~Filters.command,
-                                         onboarding_handlers.set_name),
+                               onboarding_handlers.set_name),
             ]
         },
         fallbacks=[

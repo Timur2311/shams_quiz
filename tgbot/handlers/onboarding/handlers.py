@@ -153,8 +153,8 @@ def back_to_home_page(update: Update, context: CallbackContext):
     return consts.SELECTING_ACTION
 
 def contactus(update: Update, context: CallbackContext):
-    update.message.reply_text("Iltimos, bog'lanish uchun @alamiy_bot ga o'ting", reply_markup=ReplyKeyboardMarkup([[consts.BACK]], resize_keyboard=True))
-    return consts.CONTACTING
+    update.message.reply_text("Iltimos, bog'lanish uchun @alamiy_bot ga o'ting", reply_markup=make_keyboard_for_start_command())
+    return consts.SELECTING_ACTION
 
 def bot_settings(update: Update, context: CallbackContext):
     user, _ = User.get_user_and_created(update, context)
@@ -181,12 +181,12 @@ def correct_settings(update: Update, context: CallbackContext):
     user.is_random_opponent_waites = False
     user.save()
     
-    user_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user=user)
+    user_exams = UserExam.objects.filter(user=user)
     for user_exam in user_exams:
         user_exam.is_finished = False
         user_exam.save()
         
-    user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions','users__winner_user_challenges','users__user_challenge_answers','users__owner_user_challenges','users__opponent_user_challenges','users__user_user_challenges','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users=user)
+    user_challenges = UserChallenge.objects.filter(users=user)
     for user_challenge in user_challenges:
         user_challenge.is_active = False
         user_challenge.is_random_opponent = False

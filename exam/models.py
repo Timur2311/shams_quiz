@@ -60,8 +60,8 @@ class   Question(models.Model):
             question=self, content=content, is_correct=is_correct)
 
     def create_exam(self, exam_title):
-        if Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').filter(title=exam_title).exists():
-            exam = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').get(title=exam_title)
+        if Exam.objects.filter(title=exam_title).exists():
+            exam = Exam.objects.get(title=exam_title)
             exam.questions.add(self)
         else:
             exam = Exam.objects.create(
@@ -97,15 +97,15 @@ class Exam(models.Model):
         counter = 0
         userexam = UserExam.objects.create(exam=self, user=user)
         if again:
-            UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(exam=self).filter(user = user).filter(is_finished=True).delete()
+            UserExam.objects.filter(exam=self).filter(user = user).filter(is_finished=True).delete()
         
             
-        finished_exams = UserExam.objects.select_related('exam','user').prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(
+        finished_exams = UserExam.objects.filter(
             user=user).filter(exam=self).filter(is_finished=True)
         true_user_exam_answers = []
         if finished_exams.count() > 0:
             for finished_exam in finished_exams:                
-                for user_exam_answer in UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(
+                for user_exam_answer in UserExamAnswer.objects.filter(
                     user_exam=finished_exam).filter(answered=True).filter(is_correct=True):
                         true_user_exam_answers.append(user_exam_answer.question)
 
@@ -140,7 +140,7 @@ class UserExam(models.Model):
         verbose_name_plural = 'Foydalanuvchi Testlari'
 
     def update_score(self):
-        score=UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(is_correct=True, user_exam=self).count()
+        score=UserExamAnswer.objects.filter(is_correct=True, user_exam=self).count()
         
         self.score = int(score)
        
@@ -154,11 +154,11 @@ class UserExam(models.Model):
         UserExamAnswer.objects.bulk_create(exam_answers)
 
     def last_unanswered_question(self):
-        user_exam_answer = self.answer.all().exclude(answered=True).first()
+        user_exam_answer = self.user_exam_answer.all().exclude(answered=True).first()
         return user_exam_answer.question if user_exam_answer else None
 
     def last_unanswered(self):
-        user_exam_answer = self.answer.all().exclude(answered=True).first()
+        user_exam_answer = self.user_exam_answer.all().exclude(answered=True).first()
         return user_exam_answer
 
 

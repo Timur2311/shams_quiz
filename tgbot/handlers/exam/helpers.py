@@ -5,16 +5,16 @@ from exam.models import UserExamAnswer, Exam, QuestionOption
 from group_challenge.models import UserChallengeAnswer
 
 def send_test(update, context, question, user_exam, user,type = "exam"):
-    question_theme = Exam.objects.prefetch_related('questions__question_exams','questions__question_user_exams','questions__question_challenges','questions__question_user_challenges','questions__question_user_challenge_answers','questions__options','questions').filter(questions = question)
+    question_theme = Exam.objects.filter(questions = question)
     text= f"<b>Mavzu</b>: {question_theme[0].title}\n\n"
     number_of_test = context.user_data["number_of_test"]
 
     if type == "exam":        
-        user_exam_answer = UserExamAnswer.objects.select_related('user_exam','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').get(user_exam = user_exam, question=question)
+        user_exam_answer = UserExamAnswer.objects.get(user_exam = user_exam, question=question)
         user_exam_answer.number = str(number_of_test)
         user_exam_answer.save()
     elif type =="challenge":
-        user_challenge_answers = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user_challenge =user_exam, question=question,user=user)
+        user_challenge_answers = UserChallengeAnswer.objects.filter(user_challenge =user_exam, question=question,user=user)
         user_challenge_answer = user_challenge_answers.first()
         user_challenge_answer.number = str(number_of_test)
         user_challenge_answer.save()
@@ -25,8 +25,7 @@ def send_test(update, context, question, user_exam, user,type = "exam"):
     variants = ["A", "B", "C"]
     buttons = []
     
-    question_options = QuestionOption.objects.select_related(
-        'question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options').filter(question=question).order_by("?")
+    question_options = QuestionOption.objects.filter(question=question).order_by("?")
 
     for index, question_option in enumerate(question_options):
             text += f"\n<b>{variants[index]}</b>) {question_option.content}"

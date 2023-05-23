@@ -113,11 +113,11 @@ class UserChallenge(models.Model):
         
     def update_score(self, type):
         if type == 'user':
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.filter(user_challenge=self).filter(user=self.user).filter(is_correct=True).count()
             self.user_score = int(score)
             
         elif type == "opponent":
-            score = UserChallengeAnswer.objects.select_related('user_challenge','user','question').prefetch_related('question__question_exams','question__question_user_exams','question__question_challenges','question__question_user_challenges','question__question_user_challenge_answers','question__options','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges').filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
+            score = UserChallengeAnswer.objects.filter(user_challenge=self).filter(user=self.opponent).filter(is_correct=True).count()
             self.opponent_score = int(score)
 
         return score

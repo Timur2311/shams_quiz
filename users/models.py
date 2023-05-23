@@ -28,6 +28,7 @@ class User(CreateUpdateTracker):
     language_code = models.CharField(max_length=8, help_text="Telegram client's lang", **nb)
     deep_link = models.CharField(max_length=64, **nb)
     is_blocked_bot = models.BooleanField(default=False)
+    is_message_sended = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
@@ -49,11 +50,11 @@ class User(CreateUpdateTracker):
     def set_user_score(self):
         UserChallenge = apps.get_model(app_label='group_challenge', model_name='UserChallenge')
         
-        user_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(user = self)
+        user_challenges = UserChallenge.objects.filter(user = self)
 
-        opponent_challenges = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(opponent = self)
+        opponent_challenges = UserChallenge.objects.filter(opponent = self)
 
-        challenges_count = UserChallenge.objects.select_related('user','opponent','challenge','winner').prefetch_related('questions','users','user__winner_user_challenges','user__user_challenge_answers','user__owner_user_challenges','user__opponent_user_challenges','user__user_user_challenges','questions','opponent__winner_user_challenges','opponent__user_challenge_answers','opponent__owner_user_challenges','opponent__opponent_user_challenges','opponent__user_user_challenges','winner__winner_user_challenges','winner__user_challenge_answers','winner__owner_user_challenges','winner__opponent_user_challenges','winner__user_user_challenges').filter(users = self).count()
+        challenges_count = UserChallenge.objects.filter(users = self).count()
 
         self.challenges_count =  challenges_count
         self.save()   
